@@ -3,7 +3,9 @@ package com.inventory.inventorymanagement.service.impl;
 import com.inventory.inventorymanagement.dto.ProductRequest;
 import com.inventory.inventorymanagement.dto.ProductResponse;
 import com.inventory.inventorymanagement.entity.Brand;
+import com.inventory.inventorymanagement.entity.BrandStatus;
 import com.inventory.inventorymanagement.entity.Category;
+import com.inventory.inventorymanagement.entity.CategoryStatus;
 import com.inventory.inventorymanagement.entity.Product;
 import com.inventory.inventorymanagement.entity.ProductStatus;
 import com.inventory.inventorymanagement.exception.DuplicateResourceException;
@@ -50,10 +52,18 @@ public class ProductServiceImpl implements ProductService {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
 
+        if (category.getStatus() != CategoryStatus.ACTIVE) {
+            throw new IllegalArgumentException("Cannot assign inactive category with id: " + request.getCategoryId());
+        }
+
         Brand brand = null;
         if (request.getBrandId() != null) {
             brand = brandRepository.findById(request.getBrandId())
                     .orElseThrow(() -> new ResourceNotFoundException("Brand not found with id: " + request.getBrandId()));
+
+            if (brand.getStatus() != BrandStatus.ACTIVE) {
+                throw new IllegalArgumentException("Cannot assign inactive brand with id: " + request.getBrandId());
+            }
         }
 
         Product product = new Product();
@@ -115,10 +125,18 @@ public class ProductServiceImpl implements ProductService {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + request.getCategoryId()));
 
+        if (category.getStatus() != CategoryStatus.ACTIVE) {
+            throw new IllegalArgumentException("Cannot assign inactive category with id: " + request.getCategoryId());
+        }
+
         Brand brand = null;
         if (request.getBrandId() != null) {
             brand = brandRepository.findById(request.getBrandId())
                     .orElseThrow(() -> new ResourceNotFoundException("Brand not found with id: " + request.getBrandId()));
+
+            if (brand.getStatus() != BrandStatus.ACTIVE) {
+                throw new IllegalArgumentException("Cannot assign inactive brand with id: " + request.getBrandId());
+            }
         }
 
         product.setName(request.getName().trim());

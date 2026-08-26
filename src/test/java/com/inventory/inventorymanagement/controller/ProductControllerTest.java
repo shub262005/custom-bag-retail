@@ -184,6 +184,26 @@ class ProductControllerTest {
     }
 
     @Test
+    void createProduct_InactiveCategory_Returns400BadRequest() throws Exception {
+        ProductRequest request = new ProductRequest(
+                "Test Item", "SKU-NEW", null,
+                2L, null, null, null,
+                new BigDecimal("10.00"), new BigDecimal("15.00"),
+                0, null, ProductStatus.ACTIVE
+        );
+
+        when(productService.createProduct(any(ProductRequest.class)))
+                .thenThrow(new IllegalArgumentException("Cannot assign inactive category with id: 2"));
+
+        mockMvc.perform(post("/api/v1/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Cannot assign inactive category with id: 2"));
+    }
+
+    @Test
     void createProduct_BrandNotFound_Returns404NotFound() throws Exception {
         ProductRequest request = new ProductRequest(
                 "Test Item", "SKU-NEW", null,
@@ -200,6 +220,26 @@ class ProductControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    void createProduct_InactiveBrand_Returns400BadRequest() throws Exception {
+        ProductRequest request = new ProductRequest(
+                "Test Item", "SKU-NEW", null,
+                1L, 2L, null, null,
+                new BigDecimal("10.00"), new BigDecimal("15.00"),
+                0, null, ProductStatus.ACTIVE
+        );
+
+        when(productService.createProduct(any(ProductRequest.class)))
+                .thenThrow(new IllegalArgumentException("Cannot assign inactive brand with id: 2"));
+
+        mockMvc.perform(post("/api/v1/products")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Cannot assign inactive brand with id: 2"));
     }
 
     @Test

@@ -136,6 +136,45 @@ class ProductServiceTest {
     }
 
     @Test
+    void createProduct_InactiveCategory_ThrowsIllegalArgumentException() {
+        Category inactiveCategory = new Category(2L, "Discontinued", CategoryStatus.INACTIVE, LocalDateTime.now(), LocalDateTime.now());
+        ProductRequest request = new ProductRequest(
+                "Item", "SKU-UNIQUE", null,
+                2L, null, null, null,
+                new BigDecimal("10.00"), new BigDecimal("15.00"),
+                2, null, ProductStatus.ACTIVE
+        );
+
+        when(productRepository.existsBySkuIgnoreCase("SKU-UNIQUE")).thenReturn(false);
+        when(categoryRepository.findById(2L)).thenReturn(Optional.of(inactiveCategory));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> productService.createProduct(request));
+        assertTrue(exception.getMessage().contains("Cannot assign inactive category"));
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
+    void createProduct_InactiveBrand_ThrowsIllegalArgumentException() {
+        Brand inactiveBrand = new Brand(2L, "LegacyBrand", BrandStatus.INACTIVE, LocalDateTime.now(), LocalDateTime.now());
+        ProductRequest request = new ProductRequest(
+                "Item", "SKU-UNIQUE", null,
+                1L, 2L, null, null,
+                new BigDecimal("10.00"), new BigDecimal("15.00"),
+                2, null, ProductStatus.ACTIVE
+        );
+
+        when(productRepository.existsBySkuIgnoreCase("SKU-UNIQUE")).thenReturn(false);
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(sampleCategory));
+        when(brandRepository.findById(2L)).thenReturn(Optional.of(inactiveBrand));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> productService.createProduct(request));
+        assertTrue(exception.getMessage().contains("Cannot assign inactive brand"));
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
+    @Test
     void createProduct_DuplicateSku_ThrowsDuplicateResourceException() {
         ProductRequest request = new ProductRequest(
                 "Item", "SKU-WH-001", null,
@@ -211,6 +250,29 @@ class ProductServiceTest {
     }
 
     @Test
+    void getProductById_WhenCategoryOrBrandIsInactive_StillRetrievable() {
+        Category inactiveCategory = new Category(1L, "OldCategory", CategoryStatus.INACTIVE, LocalDateTime.now(), LocalDateTime.now());
+        Brand inactiveBrand = new Brand(1L, "OldBrand", BrandStatus.INACTIVE, LocalDateTime.now(), LocalDateTime.now());
+        Product historicalProduct = new Product(
+                3L, "Legacy Product", "SKU-LEGACY", null,
+                inactiveCategory, inactiveBrand, null, null,
+                new BigDecimal("10.00"), new BigDecimal("20.00"),
+                10, 2, null, ProductStatus.ACTIVE,
+                LocalDateTime.now(), LocalDateTime.now()
+        );
+
+        when(productRepository.findById(3L)).thenReturn(Optional.of(historicalProduct));
+
+        ProductResponse response = productService.getProductById(3L);
+
+        assertNotNull(response);
+        assertEquals(3L, response.getId());
+        assertEquals("Legacy Product", response.getName());
+        assertEquals(CategoryStatus.INACTIVE, response.getCategory().getStatus());
+        assertEquals(BrandStatus.INACTIVE, response.getBrand().getStatus());
+    }
+
+    @Test
     void getProductById_NotFound_ThrowsResourceNotFoundException() {
         when(productRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -260,6 +322,47 @@ class ProductServiceTest {
         assertEquals("White", sampleProduct.getColor());
         assertEquals(25, sampleProduct.getStockQuantity()); // Stock remains unchanged!
         verify(productRepository).save(sampleProduct);
+    }
+
+    @Test
+    void updateProduct_InactiveCategory_ThrowsIllegalArgumentException() {
+        Category inactiveCategory = new Category(2L, "Discontinued", CategoryStatus.INACTIVE, LocalDateTime.now(), LocalDateTime.now());
+        ProductRequest request = new ProductRequest(
+                "Updated Headphones", "SKU-WH-001", null,
+                2L, null, null, null,
+                new BigDecimal("50.00"), new BigDecimal("80.00"),
+                5, null, ProductStatus.ACTIVE
+        );
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+        when(productRepository.existsBySkuIgnoreCaseAndIdNot("SKU-WH-001", 1L)).thenReturn(false);
+        when(categoryRepository.findById(2L)).thenReturn(Optional.of(inactiveCategory));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> productService.updateProduct(1L, request));
+        assertTrue(exception.getMessage().contains("Cannot assign inactive category"));
+        verify(productRepository, never()).save(sampleProduct);
+    }
+
+    @Test
+    void updateProduct_InactiveBrand_ThrowsIllegalArgumentException() {
+        Brand inactiveBrand = new Brand(2L, "OldBrand", BrandStatus.INACTIVE, LocalDateTime.now(), LocalDateTime.now());
+        ProductRequest request = new ProductRequest(
+                "Updated Headphones", "SKU-WH-001", null,
+                1L, 2L, null, null,
+                new BigDecimal("50.00"), new BigDecimal("80.00"),
+                5, null, ProductStatus.ACTIVE
+        );
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+        when(productRepository.existsBySkuIgnoreCaseAndIdNot("SKU-WH-001", 1L)).thenReturn(false);
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(sampleCategory));
+        when(brandRepository.findById(2L)).thenReturn(Optional.of(inactiveBrand));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> productService.updateProduct(1L, request));
+        assertTrue(exception.getMessage().contains("Cannot assign inactive brand"));
+        verify(productRepository, never()).save(sampleProduct);
     }
 
     @Test
