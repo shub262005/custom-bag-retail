@@ -49,6 +49,9 @@ public class Product {
     @Column(name = "purchase_price", nullable = false, precision = 12, scale = 2)
     private BigDecimal purchasePrice;
 
+    @Column(name = "last_purchase_price", precision = 12, scale = 2)
+    private BigDecimal lastPurchasePrice;
+
     @Column(name = "selling_price", nullable = false, precision = 12, scale = 2)
     private BigDecimal sellingPrice;
 
@@ -168,6 +171,14 @@ public class Product {
 
     public void setPurchasePrice(BigDecimal purchasePrice) {
         this.purchasePrice = purchasePrice;
+    }
+
+    public BigDecimal getLastPurchasePrice() {
+        return lastPurchasePrice;
+    }
+
+    public void setLastPurchasePrice(BigDecimal lastPurchasePrice) {
+        this.lastPurchasePrice = lastPurchasePrice;
     }
 
     public BigDecimal getSellingPrice() {

@@ -34,4 +34,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "   OR LOWER(p.sku) LIKE LOWER(CONCAT('%', :query, '%')) " +
            "   OR (p.barcode IS NOT NULL AND LOWER(p.barcode) LIKE LOWER(CONCAT('%', :query, '%')))")
     List<Product> searchProducts(@Param("query") String query);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Product p WHERE p.id = :id")
+    Optional<Product> findByIdForUpdate(@Param("id") Long id);
 }

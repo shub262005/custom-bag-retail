@@ -17,6 +17,7 @@ public class ProductResponse {
     private String color;
     private String capacity;
     private BigDecimal purchasePrice;
+    private BigDecimal lastPurchasePrice;
     private BigDecimal sellingPrice;
     private Integer stockQuantity;
     private Integer minimumStock;
@@ -63,7 +64,7 @@ public class ProductResponse {
                 ? BrandResponse.fromEntity(product.getBrand())
                 : null;
 
-        return new ProductResponse(
+        ProductResponse response = new ProductResponse(
                 product.getId(),
                 product.getName(),
                 product.getSku(),
@@ -81,6 +82,8 @@ public class ProductResponse {
                 product.getCreatedAt(),
                 product.getUpdatedAt()
         );
+        response.setLastPurchasePrice(product.getLastPurchasePrice());
+        return response;
     }
 
     public Long getId() {
@@ -153,6 +156,14 @@ public class ProductResponse {
 
     public void setPurchasePrice(BigDecimal purchasePrice) {
         this.purchasePrice = purchasePrice;
+    }
+
+    public BigDecimal getLastPurchasePrice() {
+        return lastPurchasePrice;
+    }
+
+    public void setLastPurchasePrice(BigDecimal lastPurchasePrice) {
+        this.lastPurchasePrice = lastPurchasePrice;
     }
 
     public BigDecimal getSellingPrice() {
