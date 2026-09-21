@@ -1,32 +1,47 @@
-# React + TypeScript + Vite
+# Roopam Retail Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The modern web application for the **Roopam Custom Bag Retail & ERP Management System**. Built with **React 19**, **TypeScript**, **Vite**, and **Tailwind CSS**.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Interactive 2D Custom Bag Studio**: Custom bag visualizer with parametric customization (type, size, fabric, hardware, monogram) and dynamic pricing calculations.
+- **Enterprise ERP Views**: Product catalog, supplier management, brand & category master data.
+- **Stock Ledger**: Real-time stock audit transactions (`IN`, `OUT`, `ADJUSTMENT`).
+- **Point of Sale (POS)**: Fast billing counter with invoice auto-generation and multiple payment modes.
+- **Reports & Analytics**: Real-time sales dashboards, trends, and category performance charts.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: [React 19](https://react.dev/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **State Management**: [TanStack React Query v5](https://tanstack.com/query/latest)
+- **Routing**: [React Router v7](https://reactrouter.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **HTTP Client**: [Axios](https://axios-http.com/)
 
-## Expanding the Oxlint configuration
+## Getting Started
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+### 1. Install Dependencies
+```bash
+npm install
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+### 2. Start Development Server
+```bash
+npm run dev
+```
+The application will launch at `http://localhost:5173`.
+
+> **Note:** The development server automatically proxies all `/api/*` requests to the Spring Boot backend on `http://localhost:8080`.
+
+### 3. Build for Production
+```bash
+npm run build
+```
+
+### 4. Lint Code
+```bash
+npm run lint
+```
