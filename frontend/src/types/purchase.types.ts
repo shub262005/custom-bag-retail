@@ -71,3 +71,21 @@ export interface PurchaseRequest {
   items: PurchaseItemRequest[]
   payments?: PurchasePaymentRequest[]
 }
+
+export interface PurchaseFilterParams {
+  supplierId?: number
+  status?: PurchaseStatus
+  startDate?: string
+  endDate?: string
+  search?: string
+}
+
+export type DiscountMode = 'NONE' | 'PERCENTAGE' | 'FIXED'
+
+export interface InitialPaymentForm {
+  amount: number | ''
+  paymentMethod: PaymentMethod
+  paymentDate: string
+  paymentReference: string
+  notes: string
+}

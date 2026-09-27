@@ -314,13 +314,26 @@ public class SaleServiceImpl implements SaleService {
         sale.setDiscountAmount(discountAmount);
         sale.setGrandTotal(newGrandTotal);
 
-        sale.clearItems();
+        Map<Long, SaleItem> existingItems = sale.getItems().stream()
+                .collect(Collectors.toMap(item -> item.getProduct().getId(), item -> item));
+        for (SaleItem existingItem : new ArrayList<>(sale.getItems())) {
+            if (!newQuantities.containsKey(existingItem.getProduct().getId())) {
+                sale.removeItem(existingItem);
+            }
+        }
         for (SaleItemRequest itemReq : mergedItems) {
             Product product = productMap.get(itemReq.getProductId());
             BigDecimal itemTotal = itemReq.getSellingPrice()
                     .multiply(BigDecimal.valueOf(itemReq.getQuantity()))
                     .setScale(2, RoundingMode.HALF_UP);
-            sale.addItem(new SaleItem(product, itemReq.getQuantity(), itemReq.getSellingPrice(), itemTotal));
+            SaleItem existingItem = existingItems.get(itemReq.getProductId());
+            if (existingItem != null) {
+                existingItem.setQuantity(itemReq.getQuantity());
+                existingItem.setSellingPrice(itemReq.getSellingPrice());
+                existingItem.setItemTotal(itemTotal);
+            } else {
+                sale.addItem(new SaleItem(product, itemReq.getQuantity(), itemReq.getSellingPrice(), itemTotal));
+            }
         }
 
         Sale updatedSale = saleRepository.save(sale);

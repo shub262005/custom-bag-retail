@@ -55,7 +55,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         >
           {isDestructive ? <AlertTriangle className="w-5 h-5" /> : <Info className="w-5 h-5" />}
         </div>
-        <p className="text-sm text-slate-600 mt-1 leading-relaxed">{message}</p>
+        <p className="text-sm text-slate-600 mt-1 leading-relaxed whitespace-pre-line">{message}</p>
       </div>
     </Modal>
   )

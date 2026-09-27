@@ -14,6 +14,8 @@ import { CustomBagPage } from './features/custom-bag'
 import { DashboardPage } from './pages/DashboardPage'
 import { PurchasesPage } from './pages/PurchasesPage'
 import { PurchaseCreatePage } from './pages/PurchaseCreatePage'
+import { PurchaseDetailPage } from './pages/PurchaseDetailPage'
+import { PurchaseEditPage } from './pages/PurchaseEditPage'
 import { PosPage } from './pages/PosPage'
 import { SalesPage } from './pages/SalesPage'
 import { SaleDetailPage } from './pages/SaleDetailPage'
@@ -40,6 +42,8 @@ export const App: React.FC = () => {
           <Route path="/suppliers" element={<SupplierListPage />} />
           <Route path="/purchases" element={<PurchasesPage />} />
           <Route path="/purchases/new" element={<PurchaseCreatePage />} />
+          <Route path="/purchases/:id" element={<PurchaseDetailPage />} />
+          <Route path="/purchases/:id/edit" element={<PurchaseEditPage />} />
           <Route path="/sales/pos" element={<PosPage />} />
           <Route path="/sales" element={<SalesPage />} />
           <Route path="/sales/:id" element={<SaleDetailPage />} />

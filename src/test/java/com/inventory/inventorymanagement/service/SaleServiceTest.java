@@ -554,6 +554,103 @@ class SaleServiceTest {
     // ==========================================
 
     @Test
+    void updateSale_RetainedItemPreservesIdentityAndUpdatesPrice() {
+        Sale sale = editableSale();
+        SaleItem retained = sale.getItems().get(0);
+        when(saleRepository.findById(100L)).thenReturn(Optional.of(sale));
+        when(productRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(activeProduct1));
+        when(saleRepository.save(any(Sale.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SaleResponse response = saleService.updateSale(100L, new SaleEditRequest(null,
+                List.of(new SaleItemRequest(1L, 3, new BigDecimal("900.00"))),
+                null, null, null, null, true));
+
+        assertSame(retained, sale.getItems().get(0));
+        assertEquals(501L, response.getItems().get(0).getId());
+        assertEquals(new BigDecimal("900.00"), retained.getSellingPrice());
+        assertEquals(new BigDecimal("2700.00"), retained.getItemTotal());
+        assertEquals(9, activeProduct1.getStockQuantity());
+        assertEquals(new BigDecimal("2700.00"), response.getPayment().getAmount());
+        ArgumentCaptor<SaleAuditHistory> audit = ArgumentCaptor.forClass(SaleAuditHistory.class);
+        verify(saleAuditHistoryRepository).save(audit.capture());
+        assertEquals(SaleAuditAction.SALE_UPDATED, audit.getValue().getActionType());
+    }
+
+    @Test
+    void updateSale_DuplicateSamePriceMergesIntoRetainedItem() {
+        Sale sale = editableSale();
+        when(saleRepository.findById(100L)).thenReturn(Optional.of(sale));
+        when(productRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(activeProduct1));
+        when(saleRepository.save(any(Sale.class))).thenAnswer(inv -> inv.getArgument(0));
+        SaleResponse response = saleService.updateSale(100L, new SaleEditRequest(null,
+                List.of(new SaleItemRequest(1L, 1, new BigDecimal("1000.001")),
+                        new SaleItemRequest(1L, 2, new BigDecimal("1000.00"))),
+                null, null, null, null, true));
+        assertEquals(1, response.getItems().size());
+        assertEquals(501L, response.getItems().get(0).getId());
+        assertEquals(3, response.getItems().get(0).getQuantity());
+        assertEquals(9, activeProduct1.getStockQuantity());
+    }
+
+    @Test
+    void updateSale_DuplicateDifferentPriceDoesNotMutateSale() {
+        Sale sale = editableSale();
+        when(saleRepository.findById(100L)).thenReturn(Optional.of(sale));
+        assertThrows(IllegalArgumentException.class, () -> saleService.updateSale(100L,
+                new SaleEditRequest(null, List.of(
+                        new SaleItemRequest(1L, 1, new BigDecimal("900")),
+                        new SaleItemRequest(1L, 1, new BigDecimal("1000"))),
+                        null, null, null, null, true)));
+        assertEquals(2, sale.getItems().get(0).getQuantity());
+        assertEquals(10, activeProduct1.getStockQuantity());
+        verifyNoInteractions(inventoryTransactionRepository, saleAuditHistoryRepository);
+        verify(saleRepository, never()).save(any());
+    }
+
+    @Test
+    void updateSale_InsufficientStockLeavesExistingStateUnchanged() {
+        Sale sale = editableSale();
+        when(saleRepository.findById(100L)).thenReturn(Optional.of(sale));
+        when(productRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(activeProduct1));
+        assertThrows(IllegalArgumentException.class, () -> saleService.updateSale(100L,
+                new SaleEditRequest(null, List.of(new SaleItemRequest(1L, 13, new BigDecimal("1000"))),
+                        null, null, null, null, true)));
+        assertEquals(501L, sale.getItems().get(0).getId());
+        assertEquals(2, sale.getItems().get(0).getQuantity());
+        assertEquals(new BigDecimal("2000.00"), sale.getPayment().getAmount());
+        assertEquals(10, activeProduct1.getStockQuantity());
+        verifyNoInteractions(inventoryTransactionRepository, saleAuditHistoryRepository);
+        verify(saleRepository, never()).save(any());
+    }
+
+    @Test
+    void getSales_TrimsFiltersAndMapsRepositoryResults() {
+        Sale sale = editableSale();
+        LocalDate date = LocalDate.now();
+        when(saleRepository.findWithFilters("sal", SaleStatus.COMPLETED, date, date,
+                PaymentMethod.CASH, "SKU")).thenReturn(List.of(sale));
+        List<SaleResponse> result = saleService.getSales(" sal ", SaleStatus.COMPLETED,
+                date, date, PaymentMethod.CASH, " SKU ");
+        assertEquals(100L, result.get(0).getId());
+        verify(saleRepository).findWithFilters("sal", SaleStatus.COMPLETED, date, date,
+                PaymentMethod.CASH, "SKU");
+    }
+
+    private Sale editableSale() {
+        Sale sale = new Sale();
+        sale.setId(100L);
+        sale.setSaleNumber("SAL-2026-000100");
+        sale.setSaleDate(LocalDate.now());
+        sale.setSubtotal(new BigDecimal("2000.00"));
+        sale.setGrandTotal(new BigDecimal("2000.00"));
+        SaleItem item = new SaleItem(activeProduct1, 2, new BigDecimal("1000.00"), new BigDecimal("2000.00"));
+        item.setId(501L);
+        sale.addItem(item);
+        sale.setPayment(new SalePayment(new BigDecimal("2000.00"), PaymentMethod.CASH, null));
+        return sale;
+    }
+
+    @Test
     void getDailySalesReport_ReturnsCorrectAggregates() {
         LocalDate today = LocalDate.now();
         when(saleRepository.getDailySalesMetrics(today)).thenReturn(List.<Object[]>of(new Object[]{5L, new BigDecimal("12500.00")}));

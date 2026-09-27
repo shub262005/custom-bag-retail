@@ -20,19 +20,21 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 
     boolean existsBySaleNumber(String saleNumber);
 
+    // Type nullable text/date parameters explicitly: PostgreSQL cannot reliably infer
+    // them from IS NULL or CONCAT when Hibernate binds an absent filter.
     @Query("SELECT DISTINCT s FROM Sale s " +
            "LEFT JOIN FETCH s.items i " +
            "LEFT JOIN FETCH i.product prod " +
            "LEFT JOIN FETCH s.payment p " +
-           "WHERE (:saleNumber IS NULL OR LOWER(s.saleNumber) LIKE LOWER(CONCAT('%', :saleNumber, '%'))) " +
+           "WHERE (CAST(:saleNumber AS string) IS NULL OR LOWER(s.saleNumber) LIKE LOWER(CONCAT('%', CAST(:saleNumber AS string), '%'))) " +
            "  AND (:status IS NULL OR s.status = :status) " +
-           "  AND (:startDate IS NULL OR s.saleDate >= :startDate) " +
-           "  AND (:endDate IS NULL OR s.saleDate <= :endDate) " +
+           "  AND (CAST(:startDate AS date) IS NULL OR s.saleDate >= :startDate) " +
+           "  AND (CAST(:endDate AS date) IS NULL OR s.saleDate <= :endDate) " +
            "  AND (:paymentMethod IS NULL OR p.paymentMethod = :paymentMethod) " +
-           "  AND (:search IS NULL OR (" +
-           "       LOWER(prod.name) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "       LOWER(prod.sku) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "       (prod.barcode IS NOT NULL AND LOWER(prod.barcode) LIKE LOWER(CONCAT('%', :search, '%')))" +
+           "  AND (CAST(:search AS string) IS NULL OR (" +
+           "       LOWER(prod.name) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) OR " +
+           "       LOWER(prod.sku) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) OR " +
+           "       (prod.barcode IS NOT NULL AND LOWER(prod.barcode) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))" +
            "  )) " +
            "ORDER BY s.saleDate DESC, s.id DESC")
     List<Sale> findWithFilters(@Param("saleNumber") String saleNumber,

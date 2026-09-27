@@ -55,6 +55,24 @@ class SaleControllerTest {
     }
 
     @Test
+    void getSales_NoFiltersReturnsArray() throws Exception {
+        when(saleService.getSales(null, null, null, null, null, null)).thenReturn(List.of(sampleResponse()));
+        mockMvc.perform(get("/api/v1/sales"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(1));
+    }
+
+    @Test
+    void getSales_BindsAllFilters() throws Exception {
+        LocalDate date = LocalDate.of(2026, 1, 1);
+        when(saleService.getSales("sal", SaleStatus.COMPLETED, date, date, PaymentMethod.UPI, "bag"))
+                .thenReturn(List.of(sampleResponse()));
+        mockMvc.perform(get("/api/v1/sales").param("saleNumber", "sal")
+                        .param("status", "COMPLETED").param("startDate", "2026-01-01")
+                        .param("endDate", "2026-01-01").param("paymentMethod", "UPI").param("search", "bag"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(1));
+    }
+
+    @Test
     void createSale_Success() throws Exception {
         SaleRequest request = new SaleRequest(
                 LocalDate.now(),

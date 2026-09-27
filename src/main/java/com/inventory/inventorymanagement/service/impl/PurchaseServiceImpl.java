@@ -365,12 +365,38 @@ public class PurchaseServiceImpl implements PurchaseService {
         purchase.setGrandTotal(grandTotal);
         purchase.setNotes(request.getNotes() != null ? request.getNotes().trim() : null);
 
-        purchase.clearItems();
+        Map<Long, PurchaseItemRequest> requestedItemsMap = new HashMap<>();
+        for (PurchaseItemRequest itemReq : request.getItems()) {
+            requestedItemsMap.put(itemReq.getProductId(), itemReq);
+        }
+
+        // 1. Remove items that are no longer in the request
+        List<PurchaseItem> existingItems = new ArrayList<>(purchase.getItems());
+        for (PurchaseItem existingItem : existingItems) {
+            Long prodId = existingItem.getProduct().getId();
+            if (!requestedItemsMap.containsKey(prodId)) {
+                purchase.removeItem(existingItem);
+            }
+        }
+
+        // 2. Update existing items in-place or add new items
         for (PurchaseItemRequest itemReq : request.getItems()) {
             Product product = productMap.get(itemReq.getProductId());
             BigDecimal itemTotal = itemReq.getPurchasePrice().multiply(BigDecimal.valueOf(itemReq.getQuantity()))
                     .setScale(2, RoundingMode.HALF_UP);
-            purchase.addItem(new PurchaseItem(product, itemReq.getQuantity(), itemReq.getPurchasePrice(), itemTotal));
+
+            Optional<PurchaseItem> existingItemOpt = purchase.getItems().stream()
+                    .filter(item -> item.getProduct().getId().equals(itemReq.getProductId()))
+                    .findFirst();
+
+            if (existingItemOpt.isPresent()) {
+                PurchaseItem existingItem = existingItemOpt.get();
+                existingItem.setQuantity(itemReq.getQuantity());
+                existingItem.setPurchasePrice(itemReq.getPurchasePrice());
+                existingItem.setItemTotal(itemTotal);
+            } else {
+                purchase.addItem(new PurchaseItem(product, itemReq.getQuantity(), itemReq.getPurchasePrice(), itemTotal));
+            }
         }
 
         Purchase updatedPurchase = purchaseRepository.save(purchase);

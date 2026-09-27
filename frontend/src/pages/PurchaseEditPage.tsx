@@ -1,6 +1,6 @@
 import React from 'react'
 import { PurchaseFormPage } from '../features/purchases/PurchaseFormPage'
 
-export const PurchaseCreatePage: React.FC = () => {
-  return <PurchaseFormPage mode="create" />
+export const PurchaseEditPage: React.FC = () => {
+  return <PurchaseFormPage mode="edit" />
 }
