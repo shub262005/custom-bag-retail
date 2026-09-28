@@ -1,10 +1,11 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios'
+import { AUTH_UNAUTHORIZED_EVENT, getStoredToken } from '../auth/authStorage'
 
 /**
  * Shared Axios client for the Inventory Management System.
  * 
  * - Base URL is set to '/api/v1', which is proxied by Vite to http://localhost:8080 during development.
- * - Future Spring Security JWT authentication can be integrated via the request interceptor below.
+ * - Attaches the persisted Spring Security JWT when one is available.
  * - Does NOT implement fake users, fake login, or fake roles.
  */
 export const axiosClient = axios.create({
@@ -15,14 +16,12 @@ export const axiosClient = axios.create({
   timeout: 15000,
 })
 
-// Placeholder request interceptor for future authentication
 axiosClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // When Spring Security is introduced in the backend, retrieve the bearer token:
-    // const token = localStorage.getItem('auth_token')
-    // if (token && config.headers) {
-    //   config.headers.Authorization = `Bearer ${token}`
-    // }
+    const token = getStoredToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   (error: AxiosError) => {
@@ -34,7 +33,9 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    // Pass the rejection through so TanStack Query or call sites can handle it
+    if (error.response?.status === 401 && getStoredToken()) {
+      window.dispatchEvent(new Event(AUTH_UNAUTHORIZED_EVENT))
+    }
     return Promise.reject(error)
   }
 )

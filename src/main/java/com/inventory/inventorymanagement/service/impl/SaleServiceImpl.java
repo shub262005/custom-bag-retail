@@ -6,6 +6,7 @@ import com.inventory.inventorymanagement.exception.ResourceNotFoundException;
 import com.inventory.inventorymanagement.repository.*;
 import com.inventory.inventorymanagement.service.SaleNumberGenerator;
 import com.inventory.inventorymanagement.service.SaleService;
+import com.inventory.inventorymanagement.security.CurrentUserService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ public class SaleServiceImpl implements SaleService {
     private final ProductRepository productRepository;
     private final InventoryTransactionRepository inventoryTransactionRepository;
     private final SaleNumberGenerator saleNumberGenerator;
+    private final CurrentUserService currentUserService;
 
     public SaleServiceImpl(SaleRepository saleRepository,
                            SaleItemRepository saleItemRepository,
@@ -35,7 +37,8 @@ public class SaleServiceImpl implements SaleService {
                            SaleAuditHistoryRepository saleAuditHistoryRepository,
                            ProductRepository productRepository,
                            InventoryTransactionRepository inventoryTransactionRepository,
-                           SaleNumberGenerator saleNumberGenerator) {
+                           SaleNumberGenerator saleNumberGenerator,
+                           CurrentUserService currentUserService) {
         this.saleRepository = saleRepository;
         this.saleItemRepository = saleItemRepository;
         this.salePaymentRepository = salePaymentRepository;
@@ -43,6 +46,7 @@ public class SaleServiceImpl implements SaleService {
         this.productRepository = productRepository;
         this.inventoryTransactionRepository = inventoryTransactionRepository;
         this.saleNumberGenerator = saleNumberGenerator;
+        this.currentUserService = currentUserService;
     }
 
     @Override
@@ -150,7 +154,8 @@ public class SaleServiceImpl implements SaleService {
 
         String auditDesc = String.format("Sale created with %d item(s), total ₹%s",
                 savedSale.getItems().size(), savedSale.getGrandTotal().toPlainString());
-        saleAuditHistoryRepository.save(new SaleAuditHistory(savedSale, "SYSTEM", SaleAuditAction.SALE_CREATED, auditDesc));
+        saleAuditHistoryRepository.save(new SaleAuditHistory(savedSale, currentUserService.getActorIdentifier(),
+                SaleAuditAction.SALE_CREATED, auditDesc));
 
         return SaleResponse.fromEntity(savedSale);
     }
@@ -340,7 +345,8 @@ public class SaleServiceImpl implements SaleService {
 
         String auditDesc = String.format("Sale updated: items and payment adjusted, new total ₹%s",
                 updatedSale.getGrandTotal().toPlainString());
-        saleAuditHistoryRepository.save(new SaleAuditHistory(updatedSale, "SYSTEM", SaleAuditAction.SALE_UPDATED, auditDesc));
+        saleAuditHistoryRepository.save(new SaleAuditHistory(updatedSale, currentUserService.getActorIdentifier(),
+                SaleAuditAction.SALE_UPDATED, auditDesc));
 
         return SaleResponse.fromEntity(updatedSale);
     }
@@ -395,13 +401,14 @@ public class SaleServiceImpl implements SaleService {
         sale.setStatus(SaleStatus.CANCELLED);
         sale.setCancellationReason(request.getReason());
         sale.setCancellationDescription(request.getDescription() != null ? request.getDescription().trim() : null);
-        sale.setCancelledBy("SYSTEM");
+        String actor = currentUserService.getActorIdentifier();
+        sale.setCancelledBy(actor);
         sale.setCancelledAt(LocalDateTime.now());
 
         Sale saved = saleRepository.save(sale);
 
         String auditDesc = "Sale cancelled: " + request.getReason();
-        saleAuditHistoryRepository.save(new SaleAuditHistory(saved, "SYSTEM", SaleAuditAction.SALE_CANCELLED, auditDesc));
+        saleAuditHistoryRepository.save(new SaleAuditHistory(saved, actor, SaleAuditAction.SALE_CANCELLED, auditDesc));
 
         return SaleResponse.fromEntity(saved);
     }

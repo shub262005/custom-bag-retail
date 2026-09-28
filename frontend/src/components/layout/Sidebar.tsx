@@ -18,6 +18,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
+import { useAuth } from '../../hooks/useAuth'
 
 export interface SidebarProps {
   isCollapsed: boolean
@@ -25,6 +26,9 @@ export interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse }) => {
+  const { user } = useAuth()
+  const isCustomer = user?.role === 'CUSTOMER'
+  const isManagement = user?.role === 'ADMIN' || user?.role === 'INVENTORY_MANAGER'
   const [productsOpen, setProductsOpen] = useState(true)
   const [inventoryOpen, setInventoryOpen] = useState(true)
   const [salesOpen, setSalesOpen] = useState(true)
@@ -72,11 +76,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
 
       {/* Navigation List */}
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
+        {!isCustomer && (
+          <>
         {/* Dashboard */}
         <NavLink to="/dashboard" className={navItemClass} title="Dashboard">
           <LayoutDashboard className="w-4 h-4 shrink-0" />
           {!isCollapsed && <span>Dashboard</span>}
         </NavLink>
+
+        {isManagement && (
+          <>
 
         {/* Products Section */}
         <div>
@@ -171,6 +180,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           <Receipt className="w-4 h-4 shrink-0" />
           {!isCollapsed && <span>Purchases</span>}
         </NavLink>
+          </>
+        )}
 
         {/* Sales Section */}
         <div>
@@ -210,9 +221,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
             </>
           )}
         </div>
+          </>
+        )}
 
         {/* Custom Bag Demo */}
-        <NavLink to="/custom-bag" className={navItemClass} title="Custom Bag">
+        {(isCustomer || isManagement) && <NavLink to="/custom-bag" className={navItemClass} title="Custom Bag">
           <Palette className="w-4 h-4 shrink-0" />
           {!isCollapsed && (
             <div className="flex items-center justify-between flex-1">
@@ -222,13 +235,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               </span>
             </div>
           )}
-        </NavLink>
+        </NavLink>}
 
         {/* Reports */}
-        <NavLink to="/reports" className={navItemClass} title="Reports">
-          <BarChart3 className="w-4 h-4 shrink-0" />
-          {!isCollapsed && <span>Reports</span>}
-        </NavLink>
+        {isManagement && (
+          <NavLink to="/reports" className={navItemClass} title="Reports">
+            <BarChart3 className="w-4 h-4 shrink-0" />
+            {!isCollapsed && <span>Reports</span>}
+          </NavLink>
+        )}
       </nav>
 
       {/* Collapse Toggle Footer */}

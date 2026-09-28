@@ -5,6 +5,7 @@ import com.inventory.inventorymanagement.entity.*;
 import com.inventory.inventorymanagement.exception.ResourceNotFoundException;
 import com.inventory.inventorymanagement.repository.*;
 import com.inventory.inventorymanagement.service.impl.SaleServiceImpl;
+import com.inventory.inventorymanagement.security.CurrentUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +50,9 @@ class SaleServiceTest {
     @Mock
     private SaleNumberGenerator saleNumberGenerator;
 
+    @Mock
+    private CurrentUserService currentUserService;
+
     @InjectMocks
     private SaleServiceImpl saleService;
 
@@ -58,6 +62,7 @@ class SaleServiceTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(currentUserService.getActorIdentifier()).thenReturn(CurrentUserService.SYSTEM_ACTOR);
         Category category = new Category(1L, "Backpacks", CategoryStatus.ACTIVE, LocalDateTime.now(), LocalDateTime.now());
         Brand brand = new Brand(1L, "Skybags", BrandStatus.ACTIVE, LocalDateTime.now(), LocalDateTime.now());
 
@@ -80,6 +85,7 @@ class SaleServiceTest {
 
     @Test
     void createSale_SuccessfulMultiItem() {
+        when(currentUserService.getActorIdentifier()).thenReturn("cashier@example.com");
         when(productRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(activeProduct1));
         when(productRepository.findByIdForUpdate(2L)).thenReturn(Optional.of(activeProduct2));
         when(saleNumberGenerator.generateSaleNumber(any())).thenReturn("SAL-2026-000001");
@@ -108,7 +114,10 @@ class SaleServiceTest {
         assertEquals(4, activeProduct2.getStockQuantity());
 
         verify(inventoryTransactionRepository, times(2)).save(any(InventoryTransaction.class));
-        verify(saleAuditHistoryRepository).save(any(SaleAuditHistory.class));
+        ArgumentCaptor<SaleAuditHistory> createdAudit = ArgumentCaptor.forClass(SaleAuditHistory.class);
+        verify(saleAuditHistoryRepository).save(createdAudit.capture());
+        assertEquals("cashier@example.com", createdAudit.getValue().getUserId());
+        assertEquals(SaleAuditAction.SALE_CREATED, createdAudit.getValue().getActionType());
     }
 
     @Test
@@ -497,6 +506,7 @@ class SaleServiceTest {
 
     @Test
     void cancelSale_SuccessfulRestoration_EvenWhenStockLow() {
+        when(currentUserService.getActorIdentifier()).thenReturn("manager@example.com");
         Sale sale = new Sale();
         sale.setId(300L);
         sale.setSaleNumber("SAL-2026-000300");
@@ -515,10 +525,14 @@ class SaleServiceTest {
         assertEquals(SaleStatus.CANCELLED, response.getStatus());
         assertEquals(CancellationReason.CUSTOMER_RETURNED_ITEM, response.getCancellationReason());
         assertEquals("Damaged zip", response.getCancellationDescription());
+        assertEquals("manager@example.com", response.getCancelledBy());
         assertEquals(7, activeProduct1.getStockQuantity()); // 2 + 5 = 7!
 
         verify(inventoryTransactionRepository).save(any(InventoryTransaction.class));
-        verify(saleAuditHistoryRepository).save(any(SaleAuditHistory.class));
+        ArgumentCaptor<SaleAuditHistory> cancelledAudit = ArgumentCaptor.forClass(SaleAuditHistory.class);
+        verify(saleAuditHistoryRepository).save(cancelledAudit.capture());
+        assertEquals("manager@example.com", cancelledAudit.getValue().getUserId());
+        assertEquals(SaleAuditAction.SALE_CANCELLED, cancelledAudit.getValue().getActionType());
     }
 
     @Test

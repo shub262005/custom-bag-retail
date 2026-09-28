@@ -1,7 +1,8 @@
 import React from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { Plus, AlertCircle } from 'lucide-react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Plus, AlertCircle, LogOut, UserRound } from 'lucide-react'
 import { Button } from '../ui/Button'
+import { useAuth } from '../../hooks/useAuth'
 
 export interface HeaderProps {
   isSidebarCollapsed: boolean
@@ -9,6 +10,15 @@ export interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ isSidebarCollapsed }) => {
   const location = useLocation()
+  const navigate = useNavigate()
+  const { user, logout } = useAuth()
+  const isCustomer = user?.role === 'CUSTOMER'
+  const isManagement = user?.role === 'ADMIN' || user?.role === 'INVENTORY_MANAGER'
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
 
   // Generate page title from current path
   const getPageTitle = (pathname: string): string => {
@@ -43,27 +53,49 @@ export const Header: React.FC<HeaderProps> = ({ isSidebarCollapsed }) => {
 
       {/* Right Action Controls */}
       <div className="flex items-center gap-3">
-        {/* Low-Stock Alert Indicator Placeholder */}
-        <Link
-          to="/inventory"
-          title="Low stock alert indicator"
-          className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md hover:bg-amber-100 transition-colors"
-        >
-          <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
-          <span className="hidden sm:inline font-medium">Stock Alerts</span>
-        </Link>
+        {isManagement && (
+            <Link
+              to="/inventory"
+              title="Low stock alert indicator"
+              className="hidden md:flex items-center gap-1.5 px-2.5 py-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md hover:bg-amber-100 transition-colors"
+            >
+              <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+              <span className="font-medium">Stock Alerts</span>
+            </Link>
+        )}
+        {!isCustomer && (
+            <Link to="/sales/pos" className="hidden sm:block">
+              <Button
+                size="sm"
+                variant="primary"
+                leftIcon={<Plus className="w-3.5 h-3.5" />}
+                className="font-medium"
+              >
+                New Sale
+              </Button>
+            </Link>
+        )}
 
-        {/* Quick New Sale CTA */}
-        <Link to="/sales/pos">
+        <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
+          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
+            <UserRound className="w-4 h-4" />
+          </div>
+          <div className="hidden lg:block min-w-0 max-w-40">
+            <p className="text-xs font-semibold text-slate-800 truncate">{user?.name}</p>
+            <p className="text-[10px] text-slate-500 truncate">
+              {user?.role.replaceAll('_', ' ')}
+            </p>
+          </div>
           <Button
             size="sm"
-            variant="primary"
-            leftIcon={<Plus className="w-3.5 h-3.5" />}
-            className="font-medium"
+            variant="ghost"
+            leftIcon={<LogOut className="w-3.5 h-3.5" />}
+            onClick={handleLogout}
+            title={user?.email ? `Sign out ${user.email}` : 'Sign out'}
           >
-            New Sale
+            <span className="hidden sm:inline">Logout</span>
           </Button>
-        </Link>
+        </div>
       </div>
     </header>
   )

@@ -265,7 +265,7 @@ custom-bag-retail/
 │   │   │   └── service/               # Core Business Logic & Generators
 │   │   └── resources/
 │   │       ├── application.properties # Spring configuration (DB, Flyway, Hibernate)
-│   │       └── db/migration/          # Version-controlled SQL migrations (V1 to V8)
+│   │       └── db/migration/          # Version-controlled SQL migrations (V1 to V9)
 │   └── test/                          # Unit & integration test suites
 │
 ├── frontend/                          # Vite + React Frontend
@@ -302,6 +302,63 @@ custom-bag-retail/
 - **Flyway Baseline Management**: Schema state is tracked and verified before startup, preventing schema drift across environments.
 - **Transactional Consistency**: All inventory deductions, sale insertions, and purchase order modifications run within `@Transactional` boundaries.
 - **Auditing**: Every critical operation (sale cancellation, inventory alteration) triggers an immutable audit entry recording user actions and reasons.
+
+## 🔐 Authentication and Authorization
+
+Authentication uses PostgreSQL users, BCrypt password hashes, and stateless eight-hour HS256 JWT access tokens. Set a production-strength `JWT_SECRET` environment variable before deploying; the configured fallback is for local development only.
+
+| Method | Endpoint | Access |
+| :--- | :--- | :--- |
+| `POST` | `/api/v1/auth/register` | Public; always creates an active `CUSTOMER` |
+| `POST` | `/api/v1/auth/login` | Public |
+| `GET` | `/api/v1/auth/me` | Valid bearer token required |
+
+All business APIs are protected by Spring Security. Anonymous requests receive structured JSON `401` responses; authenticated users without the required role receive structured JSON `403` responses. `OPTIONS` requests remain available for development preflight handling.
+
+| Capability | ADMIN | INVENTORY_MANAGER | CASHIER | CUSTOMER |
+| :--- | :---: | :---: | :---: | :---: |
+| Dashboard | ✓ | ✓ | ✓ | — |
+| Product reads | ✓ | ✓ | ✓ (POS) | — |
+| Product/category/brand management | ✓ | ✓ | — | — |
+| Inventory, suppliers, purchases | ✓ | ✓ | — | — |
+| Sales create/read/edit | ✓ | ✓ | ✓ | — |
+| Sales cancel | ✓ | ✓ | — | — |
+| Reports | ✓ | ✓ | — | — |
+| Custom Bag prototype | ✓ | ✓ | — | ✓ |
+
+Sale audit records use the authenticated user's normalized email because the existing audit and `cancelled_by` columns are string fields. Authenticated create, edit, and cancel operations never trust actor data from the request. Internal service invocations without an authenticated principal retain the explicit `SYSTEM` fallback.
+
+The React client stores only the access token in browser `localStorage`, reloads the current user from `/api/v1/auth/me`, and clears the token and authenticated query cache on logout or a 401 response. This is an appropriate tradeoff for this college project; production deployments should reassess the threat model and may prefer secure HttpOnly cookies to reduce exposure to script-based token theft.
+
+### Development staff accounts
+
+Start the backend with the `dev` profile to insert missing staff accounts without changing existing passwords:
+
+```powershell
+mvn spring-boot:run "-Dspring-boot.run.profiles=dev"
+```
+
+The temporary local-only demo accounts are:
+
+| Role | Email | Temporary password |
+| :--- | :--- | :--- |
+| `ADMIN` | `admin@roopam.local` | `AdminDemo!2026` |
+| `INVENTORY_MANAGER` | `inventory@roopam.local` | `InventoryDemo!2026` |
+| `CASHIER` | `cashier@roopam.local` | `CashierDemo!2026` |
+
+Override these with the `DEV_ADMIN_*`, `DEV_INVENTORY_*`, and `DEV_CASHIER_*` environment variables. Never enable the `dev` profile with demo credentials in production.
+
+Run the opt-in real PostgreSQL authentication regression with:
+
+```powershell
+mvn test "-Dauth.postgres.tests=true" "-Dtest=AuthPostgresRegressionTest"
+```
+
+Run the complete real PostgreSQL authorization and sales regression set with:
+
+```powershell
+mvn test "-Dauth.postgres.tests=true" "-Dauthorization.postgres.tests=true" "-Dsales.postgres.tests=true"
+```
 
 ---
 
