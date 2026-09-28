@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Search, Plus, AlertCircle } from 'lucide-react'
+import { Plus, AlertCircle } from 'lucide-react'
 import { Button } from '../ui/Button'
 
 export interface HeaderProps {
@@ -39,22 +39,6 @@ export const Header: React.FC<HeaderProps> = ({ isSidebarCollapsed }) => {
         <h2 className="text-sm font-semibold text-slate-800">
           {getPageTitle(location.pathname)}
         </h2>
-      </div>
-
-      {/* Center Search Placeholder */}
-      <div className="hidden md:flex items-center w-80">
-        <div className="relative w-full">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-          <input
-            type="text"
-            readOnly
-            placeholder="Search products by SKU, name, or barcode..."
-            className="w-full text-xs bg-slate-50 border border-slate-200 rounded-md pl-8 pr-12 py-1.5 text-slate-600 placeholder:text-slate-400 focus:outline-none cursor-pointer hover:bg-slate-100 transition-colors"
-          />
-          <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] bg-white border border-slate-200 rounded px-1 text-slate-400 font-mono">
-            /
-          </kbd>
-        </div>
       </div>
 
       {/* Right Action Controls */}
