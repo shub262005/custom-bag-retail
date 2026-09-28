@@ -122,7 +122,7 @@ export const PurchaseListPage: React.FC = () => {
         actions={
           <Link to="/purchases/new">
             <Button size="sm" variant="primary" leftIcon={<Plus className="w-3.5 h-3.5" />}>
-              + New Purchase
+              New Purchase
             </Button>
           </Link>
         }

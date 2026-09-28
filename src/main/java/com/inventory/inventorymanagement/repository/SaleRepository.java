@@ -81,8 +81,8 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
            "LEFT JOIN FETCH i.product prod " +
            "LEFT JOIN FETCH s.payment p " +
            "WHERE s.status = com.inventory.inventorymanagement.entity.SaleStatus.CANCELLED " +
-           "  AND (:startDate IS NULL OR s.saleDate >= :startDate) " +
-           "  AND (:endDate IS NULL OR s.saleDate <= :endDate) " +
+           "  AND (CAST(:startDate AS date) IS NULL OR s.saleDate >= :startDate) " +
+           "  AND (CAST(:endDate AS date) IS NULL OR s.saleDate <= :endDate) " +
            "ORDER BY s.saleDate DESC, s.id DESC")
     List<Sale> findCancelledSales(@Param("startDate") LocalDate startDate,
                                   @Param("endDate") LocalDate endDate);

@@ -20,7 +20,7 @@ export interface SaleItemRequest {
 export interface SalePaymentResponse {
   id: number
   amount: number
-  paymentMethod: PaymentMethod
+  paymentMethod: PaymentMethod | null
   description?: string | null
   createdAt: string
 }
@@ -75,4 +75,13 @@ export interface SaleEditRequest {
 export interface SaleCancelRequest {
   reason: CancellationReason
   description?: string
+}
+
+export interface SaleFilterParams {
+  saleNumber?: string
+  status?: SaleStatus
+  startDate?: string
+  endDate?: string
+  paymentMethod?: PaymentMethod
+  search?: string
 }

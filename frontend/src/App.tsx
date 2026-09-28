@@ -19,6 +19,7 @@ import { PurchaseEditPage } from './pages/PurchaseEditPage'
 import { PosPage } from './pages/PosPage'
 import { SalesPage } from './pages/SalesPage'
 import { SaleDetailPage } from './pages/SaleDetailPage'
+import { SaleEditPage } from './pages/SaleEditPage'
 import { ReportsPage } from './pages/ReportsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 
@@ -47,6 +48,7 @@ export const App: React.FC = () => {
           <Route path="/sales/pos" element={<PosPage />} />
           <Route path="/sales" element={<SalesPage />} />
           <Route path="/sales/:id" element={<SaleDetailPage />} />
+          <Route path="/sales/:id/edit" element={<SaleEditPage />} />
           <Route path="/custom-bag" element={<CustomBagPage />} />
           <Route path="/reports" element={<ReportsPage />} />
 
