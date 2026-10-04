@@ -1,3 +1,4 @@
+import { Skeleton } from './components/ui/Skeleton'
 import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
@@ -13,7 +14,7 @@ import { BrandListPage } from './features/brands/BrandListPage'
 import { SupplierListPage } from './features/suppliers/SupplierListPage'
 import { InventoryListPage, InventoryHistoryPage } from './features/inventory'
 
-// Page Placeholders
+// Routed pages
 import { DashboardPage } from './pages/DashboardPage'
 import { PurchasesPage } from './pages/PurchasesPage'
 import { PurchaseCreatePage } from './pages/PurchaseCreatePage'
@@ -43,7 +44,7 @@ const AdminCustomBagRequestsPage = React.lazy(() => import('./features/custom-ba
 const AdminCustomBagRequestDetailPage = React.lazy(() => import('./features/custom-bag/AdminCustomBagRequestDetailPage').then((module) => ({ default: module.AdminCustomBagRequestDetailPage })))
 
 const LazyPage: React.FC<React.PropsWithChildren> = ({ children }) => (
-  <React.Suspense fallback={<div className="py-16 text-center text-sm font-medium text-slate-500">Loading…</div>}>
+  <React.Suspense fallback={<div role="status" aria-label="Loading page" className="space-y-4"><Skeleton className="h-20" /><Skeleton className="h-64" /></div>}>
     {children}
   </React.Suspense>
 )
@@ -78,7 +79,7 @@ export const App: React.FC = () => {
             </Route>
           </Route>
 
-          <Route element={<AppLayout />}>
+          <Route element={<CustomerOrStaffLayout />}>
             <Route element={<RoleRoute allowedRoles={MANAGEMENT_ROLES} />}>
               <Route path="/products" element={<ProductListPage />} />
               <Route path="/categories" element={<CategoryListPage />} />

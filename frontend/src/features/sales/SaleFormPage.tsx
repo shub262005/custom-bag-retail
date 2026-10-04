@@ -104,7 +104,7 @@ function SaleForm({ original }: { original?: SaleResponse }) {
     finally { sending.current = false }
   }
   return <div className="space-y-4">
-    <PageHeader title={original ? `Edit ${original.saleNumber}` : 'POS Checkout'} description="Create a sale using current product inventory." breadcrumbs={[{ label: 'Sales', href: '/sales' }, { label: original ? 'Edit Sale' : 'POS' }]} actions={<Link to={original ? `/sales/${original.id}` : '/sales'}><Button variant="secondary">{original ? 'Back to Sale' : 'Sales History'}</Button></Link>} />
+    <PageHeader title={original ? `Edit ${original.saleNumber}` : 'POS Checkout'} description={original ? 'Update this sale and its inventory quantities.' : 'Create a sale using current product inventory.'} breadcrumbs={[{ label: 'Sales', href: '/sales' }, { label: original ? 'Edit Sale' : 'POS' }]} actions={<Link to={original ? `/sales/${original.id}` : '/sales'}><Button variant="secondary">{original ? 'Back to Sale' : 'Sales History'}</Button></Link>} />
     {original && <p className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">Editing this completed sale may change inventory quantities. Available quantity includes the units already sold on this sale.</p>}
     {saved && <div role="status" className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900">Sale <strong>{saved.saleNumber}</strong> completed · {formatINR(saved.grandTotal)}. <Link className="underline font-semibold" to={`/sales/${saved.id}`}>Open Sale Details</Link></div>}
     {error && <ErrorAlert message={error} validationErrors={fields} />}

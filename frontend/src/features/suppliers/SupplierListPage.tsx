@@ -357,7 +357,7 @@ export const SupplierListPage: React.FC = () => {
                     {/* Status */}
                     <TableCell className="text-center">
                       <Badge variant={supplier.status === 'ACTIVE' ? 'success' : 'neutral'}>
-                        {supplier.status}
+                        {supplier.status === 'ACTIVE' ? 'Active' : 'Inactive'}
                       </Badge>
                     </TableCell>
 

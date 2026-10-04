@@ -187,6 +187,19 @@ class CustomBagRequestPostgresRegressionTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("APPROVED"))
                 .andExpect(jsonPath("$.adminNote").value("Approved for production"));
 
+        mockMvc.perform(patch("/api/v1/custom-bag-requests/admin/{id}", firstId)
+                        .header("Authorization", "Bearer " + adminToken).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"COMPLETED\",\"adminNote\":\"Design completed\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("COMPLETED"));
+        mockMvc.perform(get("/api/v1/custom-bag-requests/mine/{id}", firstId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("COMPLETED"))
+                .andExpect(jsonPath("$.adminNote").value("Design completed"));
+        mockMvc.perform(patch("/api/v1/custom-bag-requests/admin/{id}", firstId)
+                        .header("Authorization", "Bearer " + adminToken).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"status\":\"REVIEWING\"}"))
+                .andExpect(status().isBadRequest());
+
         assertEquals(productCount, products.count());
         assertEquals(saleCount, sales.count());
         assertEquals(purchaseCount, purchases.count());

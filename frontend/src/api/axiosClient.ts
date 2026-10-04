@@ -10,9 +10,7 @@ import { AUTH_UNAUTHORIZED_EVENT, getStoredToken } from '../auth/authStorage'
  */
 export const axiosClient = axios.create({
   baseURL: '/api/v1',
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  // Axios selects JSON for object bodies; the browser supplies the boundary for FormData.
   timeout: 15000,
 })
 

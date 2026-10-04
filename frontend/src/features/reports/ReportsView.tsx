@@ -300,7 +300,7 @@ export const ReportsView: React.FC = () => {
                 <StatCard
                   title="Completed Sales Revenue"
                   value={formatINR(dateRangeQuery.data?.totalSalesAmount ?? 0)}
-                  subtitle="Gross net revenue"
+                  subtitle="Completed sale totals after discounts"
                   icon={<TrendingUp className="w-5 h-5 text-emerald-600" />}
                 />
                 <StatCard

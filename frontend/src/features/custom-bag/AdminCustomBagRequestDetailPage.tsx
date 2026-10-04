@@ -1,3 +1,4 @@
+import { Skeleton } from '../../components/ui/Skeleton'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, ImageOff } from 'lucide-react'
@@ -24,7 +25,7 @@ const actions: Record<CustomBagRequestStatus, string> = {
 const label = (value: string | null) => value ? value.replaceAll('_', ' ').toLowerCase().replace(/^./, c => c.toUpperCase()) : '—'
 
 function SummarySection({ title, rows }: { title: string; rows: Array<[string, string]> }) {
-  return <section className="rounded-xl border border-slate-200 bg-white p-5"><h2 className="font-semibold text-slate-900">{title}</h2><dl className="mt-3 space-y-2 text-sm">{rows.map(([name, value]) => <div key={name} className="flex justify-between gap-4"><dt className="text-slate-500">{name}</dt><dd className="text-right font-medium text-slate-800">{value}</dd></div>)}</dl></section>
+  return <section className="rounded-xl border border-slate-200 bg-white p-5"><h2 className="font-semibold text-slate-900">{title}</h2><dl className="mt-3 space-y-2 text-sm">{rows.map(([name, value]) => <div key={name} className="flex justify-between gap-4"><dt className="text-slate-500">{name}</dt><dd className="min-w-0 wrap-anywhere text-right font-medium text-slate-800">{value}</dd></div>)}</dl></section>
 }
 
 export function AdminCustomBagRequestDetailPage() {
@@ -46,7 +47,7 @@ export function AdminCustomBagRequestDetailPage() {
   }
 
   if (!Number.isInteger(id) || id <= 0) return <ErrorAlert title="Request not found" message="This custom bag request does not exist." />
-  if (query.isLoading) return <div className="rounded-xl border bg-white p-10 text-center text-sm text-slate-500">Loading request…</div>
+  if (query.isLoading) return <div role="status" aria-label="Loading requests" className="space-y-4"><Skeleton className="h-20 rounded-xl" /><Skeleton className="h-64 rounded-xl" /></div>
   if (query.isError || !request || !configuration) return <div className="space-y-4"><Link to="/custom-bag-requests" className="inline-flex items-center gap-1 text-sm text-blue-600"><ArrowLeft className="h-4 w-4" />Back to inbox</Link><ErrorAlert title="Request not found" message={getErrorMessage(query.error)} onRetry={() => query.refetch()} /></div>
   const next = transitions[request.status] ?? []
   const adminNote = noteDraft?.id === request.id ? noteDraft.value : request.adminNote ?? ''
@@ -54,7 +55,7 @@ export function AdminCustomBagRequestDetailPage() {
   return <div className="space-y-6">
     <PageHeader title={request.requestNumber} description={`${request.customer.name} · ${request.customer.email}`} breadcrumbs={[{ label: 'Custom Bag Requests', href: '/custom-bag-requests' }, { label: request.requestNumber }]} actions={<CustomBagStatusBadge status={request.status} />} />
     <section className="grid gap-4 rounded-xl border border-slate-200 bg-white p-5 sm:grid-cols-3"><div><p className="text-xs text-slate-500">Submitted</p><p className="mt-1 text-sm font-medium">{formatDateTime(request.createdAt)}</p></div><div><p className="text-xs text-slate-500">Updated</p><p className="mt-1 text-sm font-medium">{formatDateTime(request.updatedAt)}</p></div><div><p className="text-xs text-slate-500">Estimated Price</p><p className="mt-1 text-xl font-bold text-blue-700">{formatINR(request.estimatedPrice)}</p></div></section>
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]"><div><BagPreview3D configuration={configuration} />{logoQuery.isError && <p className="mt-2 flex items-center gap-2 text-xs text-amber-700"><ImageOff className="h-4 w-4" />The protected logo could not be loaded.</p>}</div><div className="grid content-start gap-4 sm:grid-cols-2 xl:grid-cols-1">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,.65fr)]"><div className="min-w-0"><BagPreview3D configuration={configuration} />{logoQuery.isError && <p className="mt-2 flex items-center gap-2 text-xs text-amber-700"><ImageOff className="h-4 w-4" />The protected logo could not be loaded.</p>}</div><div className="grid min-w-0 grid-cols-1 content-start gap-4 sm:grid-cols-2 xl:grid-cols-1">
       <SummarySection title="Bag" rows={[["Model", BAG_TEMPLATES[request.bagType].label], ["Size", label(request.size)], ["Material", label(request.material)]]} />
       <SummarySection title="Appearance" rows={[["Body", BAG_COLOR_PALETTE[request.bodyColor].label], ["Pocket", BAG_COLOR_PALETTE[request.pocketColor].label], ["Strap", BAG_COLOR_PALETTE[request.strapColor].label]]} />
       <SummarySection title="Features" rows={[["Front pocket", request.frontPocket ? 'Included' : 'Not included'], ["Side pockets", request.sidePockets ? 'Included' : 'Not included'], ["Compartments", String(request.compartmentCount)], ["Laptop padding", request.laptopPadding ? 'Included' : 'Not included'], ["Water resistant", request.waterResistant ? 'Included' : 'Not included']]} />

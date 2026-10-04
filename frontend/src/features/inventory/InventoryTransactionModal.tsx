@@ -8,6 +8,7 @@ import { ErrorAlert } from '../../components/ui/ErrorAlert'
 import { useCreateInventoryTransaction } from './useInventory'
 import { useProducts } from '../products/useProducts'
 import { useToast } from '../../context/ToastContext'
+import { localToday } from '../../utils/formatters'
 import { getErrorMessage } from '../../api/errorParser'
 import {
   ArrowDownLeft,
@@ -40,7 +41,7 @@ export const InventoryTransactionModal: React.FC<InventoryTransactionModalProps>
 
   // Fetch products for product selection
   const { productsQuery } = useProducts()
-  const allProducts = productsQuery.data || []
+  const allProducts = useMemo(() => productsQuery.data || [], [productsQuery.data])
 
   // Filter to only active products (backend forbids inactive products)
   const activeProducts = useMemo(() => {
@@ -52,7 +53,7 @@ export const InventoryTransactionModal: React.FC<InventoryTransactionModalProps>
   const [transactionType, setTransactionType] = useState<TransactionType>('STOCK_IN')
   const [quantityInput, setQuantityInput] = useState<string>('')
   const [movementDate, setMovementDate] = useState<string>(() => {
-    return new Date().toISOString().split('T')[0]
+    return localToday()
   })
   const [referenceType, setReferenceType] = useState<string>('')
   const [referenceId, setReferenceId] = useState<string>('')
@@ -72,15 +73,15 @@ export const InventoryTransactionModal: React.FC<InventoryTransactionModalProps>
 
       if (initialProduct && initialProduct.status === 'ACTIVE') {
         setSelectedProductId(String(initialProduct.id))
-      } else if (!selectedProductId && activeProducts.length > 0) {
-        setSelectedProductId(String(activeProducts[0].id))
+      } else if (activeProducts.length > 0) {
+        setSelectedProductId(current => current || String(activeProducts[0].id))
       }
 
       setQuantityInput('')
       setReason('')
       setReferenceType('')
       setReferenceId('')
-      setMovementDate(new Date().toISOString().split('T')[0])
+      setMovementDate(localToday())
     }
   }, [isOpen, initialProduct, activeProducts])
 
@@ -526,7 +527,7 @@ export const InventoryTransactionModal: React.FC<InventoryTransactionModalProps>
               {/* Helper explanation text */}
               <p className="mt-1 text-[11px] text-slate-500">
                 {transactionType === 'STOCK_IN' &&
-                  'Positive whole number to add to the existing warehouse inventory.'}
+                  'Positive whole number to add to the existing store inventory.'}
                 {transactionType === 'STOCK_OUT' &&
                   'Units to deduct from current stock. Must not exceed current available stock.'}
                 {transactionType === 'ADJUSTMENT' &&

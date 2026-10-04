@@ -18,13 +18,22 @@ export function formatINR(amount: number | null | undefined): string {
  */
 export function formatDate(dateString: string | null | undefined): string {
   if (!dateString) return '—'
-  const date = new Date(dateString)
+  // Date-only business values are local calendar dates, not UTC instants.
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(dateString)
+    ? new Date(`${dateString}T00:00:00`)
+    : new Date(dateString)
   if (isNaN(date.getTime())) return dateString
   return new Intl.DateTimeFormat('en-IN', {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
   }).format(date)
+}
+
+/** Today's local calendar date for date inputs, without a UTC conversion. */
+export function localToday(): string {
+  const date = new Date()
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 
 /**

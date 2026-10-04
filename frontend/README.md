@@ -1,47 +1,23 @@
 # Roopam Retail Frontend
 
-The modern web application for the **Roopam Custom Bag Retail & ERP Management System**. Built with **React 19**, **TypeScript**, **Vite**, and **Tailwind CSS**.
+React 19 + TypeScript + Vite + Tailwind CSS application with public/customer and staff layouts, JWT role guards, TanStack Query API state, and a Three.js Custom Bag Designer.
 
-## Features
+Modules include storefront, login/registration, backpack/laptop/duffel customization, saved request history, admin request review, dashboard, catalog, inventory, suppliers, purchases, POS, sales and reports.
 
-- **Interactive 2D Custom Bag Studio**: Custom bag visualizer with parametric customization (type, size, fabric, hardware, monogram) and dynamic pricing calculations.
-- **Enterprise ERP Views**: Product catalog, supplier management, brand & category master data.
-- **Stock Ledger**: Real-time stock audit transactions (`IN`, `OUT`, `ADJUSTMENT`).
-- **Point of Sale (POS)**: Fast billing counter with invoice auto-generation and multiple payment modes.
-- **Reports & Analytics**: Real-time sales dashboards, trends, and category performance charts.
+## Local development
 
-## Tech Stack
+Use Node.js 20.19+ or 22.12+ and run the backend on port 8080.
 
-- **Framework**: [React 19](https://react.dev/)
-- **Build Tool**: [Vite](https://vitejs.dev/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **State Management**: [TanStack React Query v5](https://tanstack.com/query/latest)
-- **Routing**: [React Router v7](https://reactrouter.com/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **HTTP Client**: [Axios](https://axios-http.com/)
-
-## Getting Started
-
-### 1. Install Dependencies
-```bash
-npm install
-```
-
-### 2. Start Development Server
-```bash
+```powershell
+npm ci
 npm run dev
 ```
-The application will launch at `http://localhost:5173`.
 
-> **Note:** The development server automatically proxies all `/api/*` requests to the Spring Boot backend on `http://localhost:8080`.
+Open `http://localhost:5173`; `/api` is proxied to the backend. The root [README](../README.md) documents PostgreSQL, dev accounts, roles, API access and uploads.
 
-### 3. Build for Production
-```bash
+```powershell
+npm run lint
 npm run build
 ```
 
-### 4. Lint Code
-```bash
-npm run lint
-```
+Store contact details are configured in `src/config/storefrontConfig.ts`. API errors, INR currency and calendar dates use shared helpers. Custom Bag routes are lazy loaded; production builds currently include a large Three.js chunk advisory.

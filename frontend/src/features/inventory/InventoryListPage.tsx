@@ -133,7 +133,7 @@ export const InventoryListPage: React.FC = () => {
     <div className="space-y-6">
       <PageHeader
         title="Inventory & Stock Levels"
-        description="Monitor real-time warehouse stock, track threshold alerts, and record stock movements."
+        description="Monitor real-time store stock, track threshold alerts, and record stock movements."
         breadcrumbs={[{ label: 'Home', href: '/dashboard' }, { label: 'Inventory' }]}
         actions={
           <div className="flex items-center gap-2.5">

@@ -326,7 +326,7 @@ export function CustomBagDesigner() {
         <CardHeader>
           <div>
             <CardTitle>Customization</CardTitle>
-            <CardDescription>Live prototype settings are not saved.</CardDescription>
+            <CardDescription>Your design is saved when you submit a request.</CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-contain lg:[scrollbar-gutter:stable]">

@@ -8,8 +8,5 @@ export const cancellationOptions = [
 ]
 export const paymentOptions = ['CASH', 'UPI', 'CARD', 'BANK_TRANSFER', 'OTHER'].map(value => ({ value, label: value === 'BANK_TRANSFER' ? 'Bank Transfer' : value === 'OTHER' ? 'Other' : value }))
 export const paymentLabel = (method?: PaymentMethod | null) => method ? paymentOptions.find(p => p.value === method)?.label : 'Not specified'
-export function localToday() {
-  const date = new Date()
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-}
+export { localToday } from '../../utils/formatters'
 export const roundMoney = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100

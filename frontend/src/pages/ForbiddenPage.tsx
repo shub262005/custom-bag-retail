@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth'
 
 export const ForbiddenPage: React.FC = () => {
   const { user } = useAuth()
-  const home = user?.role === 'CUSTOMER' ? '/custom-bag' : '/dashboard'
+  const home = user?.role === 'CUSTOMER' ? '/home' : '/dashboard'
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center p-6 text-center">

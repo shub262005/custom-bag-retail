@@ -71,7 +71,7 @@ export const RegisterPage: React.FC = () => {
   return (
     <AuthPageLayout
       title="Create customer account"
-      description="Register to use the Custom Bag Designer and future customer services."
+      description="Register to design a custom bag and track your requests."
       footerText="Already have an account?"
       footerLinkText="Sign in"
       footerLinkTo="/login"

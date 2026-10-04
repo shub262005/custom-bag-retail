@@ -6,7 +6,6 @@ import {
   Backpack,
   Box,
   Briefcase,
-  Camera,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -69,6 +68,7 @@ function BrandMark({ name }: { name: string }) {
 export function CustomerHomePage() {
   const [activeHeroSlide, setActiveHeroSlide] = useState(0)
   const brandsQuery = useQuery({ queryKey: ['storefront', 'brands'], queryFn: storefrontApi.getBrands })
+  const categoriesQuery = useQuery({ queryKey: ['storefront', 'categories'], queryFn: storefrontApi.getCategories })
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -84,34 +84,25 @@ export function CustomerHomePage() {
         <div className="pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-red-200/35 blur-3xl" />
         <div className="pointer-events-none absolute -right-16 top-8 h-56 w-56 rounded-full border-[38px] border-rose-200/35" />
         <div className="relative mx-auto grid max-w-7xl gap-10 px-4 sm:gap-12 sm:px-6 lg:px-8">
-          <div className="group relative mx-auto flex aspect-[3/4] w-full max-w-[220px] items-center justify-center overflow-hidden rounded-[2rem] border-4 border-white bg-gradient-to-br from-rose-100 via-white to-orange-50 text-center shadow-2xl shadow-rose-300/40 sm:max-w-sm">
-            <div className="absolute -right-14 -top-14 h-48 w-48 rounded-full border-[32px] border-rose-200/55 transition-transform duration-700 group-hover:scale-110" />
-            <div className="absolute -bottom-16 -left-16 h-52 w-52 rounded-full bg-red-100/70 blur-2xl" />
-            <div className="relative px-6">
-              <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-red-600 shadow-lg shadow-rose-200/60"><Camera className="h-7 w-7" aria-hidden="true" /></span>
-              <p className="mt-5 text-lg font-black text-slate-900">Owner portrait placeholder</p>
-              <p className="mt-2 text-sm leading-6 text-slate-500">Add a portrait photo of the store owner here.</p>
-            </div>
-          </div>
 
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-700">Owner introduction &amp; contact</p>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-700">Visit our store</p>
             <h1 id="owner-intro-title" className="mt-3 text-2xl font-black leading-tight tracking-[-0.035em] sm:text-3xl lg:text-5xl">Welcome to {storefrontConfig.storeName}</h1>
-            <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.12em] text-red-700 sm:text-xs sm:tracking-[0.14em]">Owner name to be added · {storefrontConfig.establishedText}</p>
+            <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.12em] text-red-700 sm:text-xs sm:tracking-[0.14em]">{storefrontConfig.establishedText}</p>
             <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600 sm:mt-5 sm:text-base sm:leading-7 lg:text-lg">Roopam Bag Mall is a physical retail shop where customers can explore trusted bag brands, compare products in person and get support with personalized bag requests. {storefrontConfig.tagline}</p>
 
             <div className="mt-6 grid gap-3 xl:grid-cols-3">
               <div className="flex gap-3 rounded-2xl border border-rose-200 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-red-700"><MapPin className="h-5 w-5" aria-hidden="true" /></span>
-                <div className="min-w-0"><p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Address</p>{storefrontConfig.address ? <address className="mt-1 not-italic text-sm font-semibold text-slate-900">{storefrontConfig.address}</address> : <p className="mt-1 text-sm font-semibold text-slate-700">Address to be added</p>}</div>
+                <div className="min-w-0"><p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Address</p>{storefrontConfig.address ? <address className="mt-1 not-italic text-sm font-semibold text-slate-900">{storefrontConfig.address}</address> : <p className="mt-1 text-sm font-semibold text-slate-700">Contact the store for location details</p>}</div>
               </div>
               <div className="flex gap-3 rounded-2xl border border-rose-200 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-red-700"><Phone className="h-5 w-5" aria-hidden="true" /></span>
-                <div className="min-w-0"><p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Phone</p>{storefrontConfig.phone ? <a href={`tel:${storefrontConfig.phone}`} className="mt-1 block text-sm font-semibold text-slate-900 hover:text-red-700">{storefrontConfig.phone}</a> : <p className="mt-1 text-sm font-semibold text-slate-700">Phone number to be added</p>}</div>
+                <div className="min-w-0"><p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Phone</p>{storefrontConfig.phone ? <a href={`tel:${storefrontConfig.phone}`} className="mt-1 block text-sm font-semibold text-slate-900 hover:text-red-700">{storefrontConfig.phone}</a> : <p className="mt-1 text-sm font-semibold text-slate-700">Contact details are being confirmed</p>}</div>
               </div>
               <div className="flex gap-3 rounded-2xl border border-rose-200 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-red-700"><Clock className="h-5 w-5" aria-hidden="true" /></span>
-                <div className="min-w-0"><p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Opening hours</p><p className="mt-1 text-sm font-semibold text-slate-700">{storefrontConfig.businessHours ?? 'Business hours to be added'}</p></div>
+                <div className="min-w-0"><p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Opening hours</p><p className="mt-1 text-sm font-semibold text-slate-700">{storefrontConfig.businessHours ?? 'Contact the store for opening hours'}</p></div>
               </div>
             </div>
 
@@ -152,6 +143,19 @@ export function CustomerHomePage() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-rose-100 bg-rose-50/50 py-10" aria-labelledby="categories-title">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 id="categories-title" className="text-2xl font-bold text-slate-950">Explore our categories</h2>
+          <p className="mt-2 text-sm text-slate-600">Discover our store categories. Visit us to check current product availability.</p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            {categoriesQuery.isLoading && <DataMessage>Loading store categories…</DataMessage>}
+            {categoriesQuery.isError && <DataMessage>Category information is temporarily unavailable.</DataMessage>}
+            {categoriesQuery.data?.length === 0 && <DataMessage>No active storefront categories are currently listed.</DataMessage>}
+            {categoriesQuery.data?.map(category => <span key={category.id} className="rounded-xl border border-rose-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700">{category.name}</span>)}
           </div>
         </div>
       </section>

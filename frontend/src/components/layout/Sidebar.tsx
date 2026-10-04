@@ -226,15 +226,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           </>
         )}
 
-        {/* Custom Bag Demo */}
+        {/* Custom Bag Designer */}
         {(isCustomer || isManagement) && <NavLink to="/custom-bag" className={navItemClass} title="Custom Bag">
           <Palette className="w-4 h-4 shrink-0" />
           {!isCollapsed && (
             <div className="flex items-center justify-between flex-1">
               <span>Custom Bag</span>
-              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">
-                Demo
-              </span>
             </div>
           )}
         </NavLink>}

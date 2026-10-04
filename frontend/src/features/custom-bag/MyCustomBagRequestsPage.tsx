@@ -1,3 +1,4 @@
+import { Skeleton } from '../../components/ui/Skeleton'
 import { Link } from 'react-router-dom'
 import { PackageOpen, Plus, ArrowRight } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
@@ -17,7 +18,7 @@ export function MyCustomBagRequestsPage() {
     <PageHeader title="My Custom Bag Requests" description="View your submitted designs and their current status."
       breadcrumbs={[{ label: 'My Custom Bag Requests' }]}
       actions={<Link to="/custom-bag" className={actionClass}><Plus className="h-4 w-4" />Create New Design</Link>} />
-    {query.isLoading && <div className="rounded-xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">Loading your requests…</div>}
+    {query.isLoading && <div role="status" aria-label="Loading requests" className="space-y-4"><Skeleton className="h-20 rounded-xl" /><Skeleton className="h-64 rounded-xl" /></div>}
     {query.isError && <ErrorAlert title="Could not load requests" message="Your custom bag request history is temporarily unavailable." onRetry={() => query.refetch()} />}
     {query.data?.length === 0 && <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
       <PackageOpen className="mx-auto h-10 w-10 text-slate-400" /><h2 className="mt-4 font-semibold text-slate-900">You haven't submitted any custom bag requests yet.</h2>

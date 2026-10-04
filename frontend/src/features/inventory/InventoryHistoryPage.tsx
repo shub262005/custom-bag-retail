@@ -1,3 +1,4 @@
+import { formatDateTime } from '../../utils/formatters'
 import React, { useState, useMemo, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { PageHeader } from '../../components/layout/PageHeader'
@@ -101,28 +102,11 @@ export const InventoryHistoryPage: React.FC = () => {
   const hasActiveFilters =
     selectedProductId !== '' || selectedType !== '' || startDate !== '' || endDate !== ''
 
-  // Helper date-time formatter
-  const formatDateTime = (dateStr: string) => {
-    try {
-      const d = new Date(dateStr)
-      return d.toLocaleString('en-IN', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      })
-    } catch {
-      return dateStr
-    }
-  }
-
   return (
     <div className="space-y-6">
       <PageHeader
         title="Inventory Transaction History"
-        description="Immutable audit trail of all warehouse stock movements, receipts, and manual count reconciliations."
+        description="Immutable audit trail of all store stock movements, receipts, and manual count reconciliations."
         breadcrumbs={[
           { label: 'Home', href: '/dashboard' },
           { label: 'Inventory', href: '/inventory' },

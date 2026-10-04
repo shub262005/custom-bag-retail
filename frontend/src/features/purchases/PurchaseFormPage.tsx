@@ -21,7 +21,7 @@ import {
   useUpdatePurchase,
 } from './usePurchases'
 import { useToast } from '../../context/ToastContext'
-import { formatINR } from '../../utils/formatters'
+import { formatINR, localToday } from '../../utils/formatters'
 import { getErrorMessage, getValidationErrors } from '../../api/errorParser'
 import type {
   PaymentMethod,
@@ -76,7 +76,7 @@ export const PurchaseFormPage: React.FC<PurchaseFormPageProps> = ({ mode = 'crea
   const isPending = createPurchaseMutation.isPending || updatePurchaseMutation.isPending
 
   // 1. Vendor & Invoice state
-  const today = new Date().toISOString().split('T')[0]
+  const today = localToday()
   const [supplierId, setSupplierId] = useState<string>('')
   const [purchaseDate, setPurchaseDate] = useState<string>(today)
   const [invoiceNumber, setInvoiceNumber] = useState<string>('')
@@ -554,7 +554,7 @@ export const PurchaseFormPage: React.FC<PurchaseFormPageProps> = ({ mode = 'crea
                   {/* Supplier Select */}
                   <div>
                     <Select
-                      label="Supplier *"
+                      label="Supplier"
                       required
                       value={supplierId}
                       onChange={(e) => setSupplierId(e.target.value)}
@@ -573,7 +573,7 @@ export const PurchaseFormPage: React.FC<PurchaseFormPageProps> = ({ mode = 'crea
                   {/* Purchase Date */}
                   <div>
                     <Input
-                      label="Purchase Date *"
+                      label="Purchase Date"
                       type="date"
                       required
                       value={purchaseDate}

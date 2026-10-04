@@ -5,7 +5,7 @@ import { Input } from '../../components/ui/Input'
 import { Select } from '../../components/ui/Select'
 import { ErrorAlert } from '../../components/ui/ErrorAlert'
 import { useToast } from '../../context/ToastContext'
-import { formatINR } from '../../utils/formatters'
+import { formatINR, localToday } from '../../utils/formatters'
 import { getErrorMessage, getValidationErrors } from '../../api/errorParser'
 import {
   useAddPurchasePayment,
@@ -38,7 +38,7 @@ export const PurchasePaymentModal: React.FC<PurchasePaymentModalProps> = ({
   const isEditMode = Boolean(paymentToEdit)
   const isPending = addPaymentMutation.isPending || updatePaymentMutation.isPending
 
-  const today = new Date().toISOString().split('T')[0]
+  const today = localToday()
 
   // Form state
   const [amount, setAmount] = useState<string>('')

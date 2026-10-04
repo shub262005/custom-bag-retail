@@ -9,7 +9,7 @@ export const CustomBagPage: React.FC = () => {
     <div className="space-y-6">
       <PageHeader
         title="Custom Bag"
-        description="Customize and inspect the Classic Backpack in the interactive 3D preview."
+        description="Design a backpack, laptop bag or duffel bag with an interactive 3D preview."
         breadcrumbs={user?.role === 'CUSTOMER'
           ? [{ label: 'Custom Bag' }]
           : [{ label: 'Home', href: '/dashboard' }, { label: 'Custom Bag' }]}

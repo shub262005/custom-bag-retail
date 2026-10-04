@@ -15,6 +15,7 @@ export function CustomerLayout() {
   const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
   const isCustomer = user?.role === 'CUSTOMER'
+  const canDesign = !user || isCustomer || user.role === 'ADMIN' || user.role === 'INVENTORY_MANAGER'
   const isHome = location.pathname === '/home'
 
   const closeMenu = () => setMobileOpen(false)
@@ -44,7 +45,7 @@ export function CustomerLayout() {
 
           <nav className="hidden items-center gap-1 md:flex" aria-label="Customer navigation">
             <NavLink to="/home" className={navClass}><Home className="mr-1.5 inline h-4 w-4" />Home</NavLink>
-            <NavLink to="/custom-bag" className={navClass}><Palette className="mr-1.5 inline h-4 w-4" />Custom Bag</NavLink>
+            {canDesign && <NavLink to="/custom-bag" className={navClass}><Palette className="mr-1.5 inline h-4 w-4" />Custom Bag</NavLink>}
             {isCustomer && <NavLink to="/my-custom-bags" className={navClass}><ClipboardList className="mr-1.5 inline h-4 w-4" />My Requests</NavLink>}
           </nav>
 
@@ -81,7 +82,7 @@ export function CustomerLayout() {
           <div id="customer-mobile-menu" className="border-t border-rose-200 bg-white px-4 py-4 shadow-lg md:hidden">
             <nav className="mx-auto flex max-w-7xl flex-col gap-1" aria-label="Mobile customer navigation">
               <NavLink to="/home" className={navClass} onClick={closeMenu}>Home</NavLink>
-              <NavLink to="/custom-bag" className={navClass} onClick={closeMenu}>Custom Bag Designer</NavLink>
+              {canDesign && <NavLink to="/custom-bag" className={navClass} onClick={closeMenu}>Custom Bag Designer</NavLink>}
               {isCustomer && <NavLink to="/my-custom-bags" className={navClass} onClick={closeMenu}>My Requests</NavLink>}
               <div className="mt-3 flex items-center gap-2 border-t border-slate-200 pt-3">
                 {user ? (
@@ -116,8 +117,8 @@ export function CustomerLayout() {
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-rose-300/70">Customer links</p>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-3 text-sm font-semibold">
               <Link to="/home" className="hover:text-white">Home</Link>
-              <Link to="/custom-bag" className="hover:text-white">Custom Bag Designer</Link>
-              <Link to="/my-custom-bags" className="hover:text-white">My Requests</Link>
+              {canDesign && <Link to="/custom-bag" className="hover:text-white">Custom Bag Designer</Link>}
+              {isCustomer && <Link to="/my-custom-bags" className="hover:text-white">My Requests</Link>}
             </div>
           </div>
         </div>

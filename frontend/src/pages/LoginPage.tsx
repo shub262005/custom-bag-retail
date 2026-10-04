@@ -7,6 +7,7 @@ import { Input } from '../components/ui/Input'
 import { ErrorAlert } from '../components/ui/ErrorAlert'
 import { getErrorMessage } from '../api/errorParser'
 import { useAuth } from '../hooks/useAuth'
+import type { UserRole } from '../types'
 
 interface LoginLocationState {
   from?: { pathname?: string }
@@ -18,6 +19,14 @@ const customerDestination = (pathname?: string) => {
     return pathname
   }
   return '/home'
+}
+
+const loginDestination = (role: UserRole, pathname?: string) => {
+  if (role === 'CUSTOMER') return customerDestination(pathname)
+  if (!pathname || pathname === '/login' || pathname === '/register' || pathname.startsWith('/my-custom-bags')) return '/dashboard'
+  if (role === 'CASHIER' && pathname !== '/dashboard' && pathname !== '/sales' && !pathname.startsWith('/sales/')) return '/dashboard'
+  if (role !== 'ADMIN' && pathname.startsWith('/custom-bag-requests')) return '/dashboard'
+  return pathname
 }
 
 export const LoginPage: React.FC = () => {
@@ -32,7 +41,7 @@ export const LoginPage: React.FC = () => {
 
   useEffect(() => {
     if (!isLoading && user) {
-      navigate(user.role === 'CUSTOMER' ? customerDestination(state?.from?.pathname) : '/dashboard', { replace: true })
+      navigate(loginDestination(user.role, state?.from?.pathname), { replace: true })
     }
   }, [isLoading, user, navigate, state?.from?.pathname])
 
@@ -42,8 +51,7 @@ export const LoginPage: React.FC = () => {
     setSubmitting(true)
     try {
       const authenticatedUser = await login({ email, password })
-      const staffDestination = state?.from?.pathname || '/dashboard'
-      navigate(authenticatedUser.role === 'CUSTOMER' ? customerDestination(state?.from?.pathname) : staffDestination, {
+      navigate(loginDestination(authenticatedUser.role, state?.from?.pathname), {
         replace: true,
       })
     } catch (requestError) {
