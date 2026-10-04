@@ -13,6 +13,13 @@ interface LoginLocationState {
   registrationMessage?: string
 }
 
+const customerDestination = (pathname?: string) => {
+  if (pathname === '/custom-bag' || pathname === '/home' || pathname?.startsWith('/my-custom-bags')) {
+    return pathname
+  }
+  return '/home'
+}
+
 export const LoginPage: React.FC = () => {
   const { login, user, isLoading } = useAuth()
   const navigate = useNavigate()
@@ -25,9 +32,9 @@ export const LoginPage: React.FC = () => {
 
   useEffect(() => {
     if (!isLoading && user) {
-      navigate(user.role === 'CUSTOMER' ? '/custom-bag' : '/dashboard', { replace: true })
+      navigate(user.role === 'CUSTOMER' ? customerDestination(state?.from?.pathname) : '/dashboard', { replace: true })
     }
-  }, [isLoading, user, navigate])
+  }, [isLoading, user, navigate, state?.from?.pathname])
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -36,7 +43,7 @@ export const LoginPage: React.FC = () => {
     try {
       const authenticatedUser = await login({ email, password })
       const staffDestination = state?.from?.pathname || '/dashboard'
-      navigate(authenticatedUser.role === 'CUSTOMER' ? '/custom-bag' : staffDestination, {
+      navigate(authenticatedUser.role === 'CUSTOMER' ? customerDestination(state?.from?.pathname) : staffDestination, {
         replace: true,
       })
     } catch (requestError) {
@@ -53,6 +60,7 @@ export const LoginPage: React.FC = () => {
       footerText="New customer?"
       footerLinkText="Create an account"
       footerLinkTo="/register"
+      footerLinkState={{ from: state?.from }}
     >
       {state?.registrationMessage && (
         <div className="mb-4 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm text-emerald-800">

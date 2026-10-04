@@ -49,7 +49,7 @@ class AuthorizationMatrixTest {
     @Test
     void customerCannotAccessBusinessApisAndGetsStructured403() throws Exception {
         for (String path : new String[]{
-                "/api/v1/products", "/api/v1/categories", "/api/v1/inventory-transactions",
+                "/api/v1/products", "/api/v1/categories", "/api/v1/brands", "/api/v1/inventory-transactions",
                 "/api/v1/suppliers", "/api/v1/purchases", "/api/v1/sales",
                 "/api/v1/sales/dashboard", "/api/v1/sales/reports/daily"}) {
             mockMvc.perform(get(path).with(user("customer@example.com").roles("CUSTOMER")))

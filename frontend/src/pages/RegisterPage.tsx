@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { LockKeyhole, Mail, UserRound } from 'lucide-react'
 import { AuthPageLayout } from '../components/auth/AuthPageLayout'
 import { Button } from '../components/ui/Button'
@@ -18,6 +18,8 @@ interface RegisterForm {
 export const RegisterPage: React.FC = () => {
   const { register, user, isLoading } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const state = location.state as { from?: { pathname?: string } } | null
   const [form, setForm] = useState<RegisterForm>({ name: '', email: '', password: '', confirmPassword: '' })
   const [errors, setErrors] = useState<Partial<Record<keyof RegisterForm, string>>>({})
   const [requestError, setRequestError] = useState<string | null>(null)
@@ -25,7 +27,7 @@ export const RegisterPage: React.FC = () => {
 
   useEffect(() => {
     if (!isLoading && user) {
-      navigate(user.role === 'CUSTOMER' ? '/custom-bag' : '/dashboard', { replace: true })
+      navigate(user.role === 'CUSTOMER' ? '/home' : '/dashboard', { replace: true })
     }
   }, [isLoading, user, navigate])
 
@@ -55,7 +57,7 @@ export const RegisterPage: React.FC = () => {
       await register({ name: form.name.trim(), email: form.email.trim(), password: form.password })
       navigate('/login', {
         replace: true,
-        state: { registrationMessage: 'Account created successfully. Sign in to continue.' },
+        state: { registrationMessage: 'Account created successfully. Sign in to continue.', from: state?.from },
       })
     } catch (error) {
       const backendErrors = getValidationErrors(error)
@@ -73,6 +75,7 @@ export const RegisterPage: React.FC = () => {
       footerText="Already have an account?"
       footerLinkText="Sign in"
       footerLinkTo="/login"
+      footerLinkState={{ from: state?.from }}
     >
       {requestError && <div className="mb-4"><ErrorAlert title="Unable to register" message={requestError} /></div>}
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>

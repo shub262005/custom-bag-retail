@@ -33,6 +33,8 @@ export const Header: React.FC<HeaderProps> = ({ isSidebarCollapsed }) => {
     if (pathname.startsWith('/purchases')) return 'Purchases'
     if (pathname.startsWith('/sales/pos')) return 'POS Register'
     if (pathname.startsWith('/sales')) return 'Sales'
+    if (pathname.startsWith('/my-custom-bags')) return 'My Custom Bag Requests'
+    if (pathname.startsWith('/custom-bag-requests')) return 'Custom Bag Requests'
     if (pathname.startsWith('/custom-bag')) return 'Custom Bag Designer'
     if (pathname.startsWith('/reports')) return 'Reports'
     return 'Retail POS'

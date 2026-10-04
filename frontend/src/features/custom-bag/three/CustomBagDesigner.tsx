@@ -1,4 +1,6 @@
 import { useMemo, useRef, useState, type ChangeEvent } from 'react'
+import { Link } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   Backpack,
   Briefcase,
@@ -28,6 +30,10 @@ import {
 } from './bagConfiguration'
 import { calculateBagPrice } from './bagPricing'
 import { BAG_TEMPLATES, normalizeConfigurationForTemplate } from './bagTemplates'
+import { CustomBagReviewModal } from './CustomBagReviewModal'
+import type { CustomBagRequestResponse } from '../customBagRequestApi'
+import { formatINR } from '../../../utils/formatters'
+import { MY_CUSTOM_BAGS_KEY } from '../useMyCustomBagRequests'
 
 const COLORS = Object.entries(BAG_COLOR_PALETTE) as [BagColor, { label: string; hex: string }][]
 const SIZES: { value: BagSize; label: string }[] = [
@@ -244,9 +250,13 @@ function SectionHeading({ children }: { children: string }) {
 }
 
 export function CustomBagDesigner() {
+  const queryClient = useQueryClient()
   const [storedConfiguration, setStoredConfiguration] =
     useState<BagConfiguration>(DEFAULT_BAG_CONFIGURATION)
   const [brandingError, setBrandingError] = useState<string | null>(null)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [reviewOpen, setReviewOpen] = useState(false)
+  const [submitted, setSubmitted] = useState<CustomBagRequestResponse | null>(null)
   const logoInputRef = useRef<HTMLInputElement>(null)
   const configuration = useMemo(
     () => ({ ...DEFAULT_BAG_CONFIGURATION, ...storedConfiguration }),
@@ -283,6 +293,7 @@ export function CustomBagDesigner() {
     try {
       const logoImage = await readAndValidateLogo(file)
       updateConfiguration('logoImage', logoImage)
+      setLogoFile(file)
       setBrandingError(null)
     } catch (error) {
       setBrandingError(error instanceof Error ? error.message : 'The logo could not be loaded.')
@@ -296,6 +307,7 @@ export function CustomBagDesigner() {
       ...template.defaults,
     })
     setBrandingError(null)
+    setLogoFile(null)
     if (logoInputRef.current) logoInputRef.current.value = ''
   }
 
@@ -511,6 +523,7 @@ export function CustomBagDesigner() {
                       leftIcon={<Trash2 className="h-3.5 w-3.5" />}
                       onClick={() => {
                         updateConfiguration('logoImage', null)
+                        setLogoFile(null)
                         setBrandingError(null)
                       }}
                     >
@@ -583,6 +596,7 @@ export function CustomBagDesigner() {
           >
             Reset Design
           </Button>
+          <Button className="w-full" onClick={() => setReviewOpen(true)}>Review Request</Button>
         </CardContent>
       </Card>
 
@@ -593,6 +607,8 @@ export function CustomBagDesigner() {
       <aside className="lg:col-span-12 xl:col-span-3">
         <BagDesignSummary configuration={configuration} price={price} />
       </aside>
+      {reviewOpen && <CustomBagReviewModal configuration={configuration} price={price} logoFile={logoFile} onClose={() => setReviewOpen(false)} onSubmitted={(response) => { setSubmitted(response); setReviewOpen(false); void queryClient.invalidateQueries({ queryKey: MY_CUSTOM_BAGS_KEY }) }} />}
+      {submitted && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4"><div className="w-full max-w-md rounded-xl bg-white p-6 text-center shadow-2xl"><h2 className="text-xl font-bold text-emerald-700">Request Submitted</h2><p className="mt-2 text-sm text-slate-600">Your design has been sent to the store for review.</p><dl className="mt-5 space-y-2 rounded-lg bg-slate-50 p-4 text-sm"><div className="flex justify-between"><dt>Request Number</dt><dd className="font-bold">{submitted.requestNumber}</dd></div><div className="flex justify-between"><dt>Status</dt><dd className="font-bold">Submitted</dd></div><div className="flex justify-between"><dt>Backend Estimated Price</dt><dd className="font-bold text-blue-600">{formatINR(submitted.estimatedPrice)}</dd></div></dl><div className="mt-5 grid gap-2"><Link to={`/my-custom-bags/${submitted.id}`} className="inline-flex items-center justify-center rounded-md bg-blue-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-blue-700">View My Request</Link><Button variant="secondary" className="w-full" onClick={() => { setStoredConfiguration(DEFAULT_BAG_CONFIGURATION); setLogoFile(null); setSubmitted(null); setBrandingError(null) }}>Start New Design</Button></div></div></div>}
     </section>
   )
 }

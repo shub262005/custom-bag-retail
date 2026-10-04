@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
+import { CustomerLayout } from './components/layout/CustomerLayout'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { RoleRoute } from './components/auth/RoleRoute'
 import { useAuth } from './hooks/useAuth'
@@ -11,7 +12,6 @@ import { CategoryListPage } from './features/categories/CategoryListPage'
 import { BrandListPage } from './features/brands/BrandListPage'
 import { SupplierListPage } from './features/suppliers/SupplierListPage'
 import { InventoryListPage, InventoryHistoryPage } from './features/inventory'
-import { CustomBagPage } from './features/custom-bag'
 
 // Page Placeholders
 import { DashboardPage } from './pages/DashboardPage'
@@ -27,28 +27,58 @@ import { ReportsPage } from './pages/ReportsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
+import { CustomerHomePage } from './pages/CustomerHomePage'
 import type { UserRole } from './types'
 
 const MANAGEMENT_ROLES: readonly UserRole[] = ['ADMIN', 'INVENTORY_MANAGER']
 const STAFF_ROLES: readonly UserRole[] = ['ADMIN', 'INVENTORY_MANAGER', 'CASHIER']
 const CUSTOM_BAG_ROLES: readonly UserRole[] = ['ADMIN', 'INVENTORY_MANAGER', 'CUSTOMER']
+const CUSTOMER_ROLES: readonly UserRole[] = ['CUSTOMER']
+const ADMIN_ROLES: readonly UserRole[] = ['ADMIN']
 
-const HomeRedirect: React.FC = () => {
+const CustomBagPage = React.lazy(() => import('./features/custom-bag/CustomBagPage').then((module) => ({ default: module.CustomBagPage })))
+const MyCustomBagRequestsPage = React.lazy(() => import('./features/custom-bag/MyCustomBagRequestsPage').then((module) => ({ default: module.MyCustomBagRequestsPage })))
+const MyCustomBagRequestDetailPage = React.lazy(() => import('./features/custom-bag/MyCustomBagRequestDetailPage').then((module) => ({ default: module.MyCustomBagRequestDetailPage })))
+const AdminCustomBagRequestsPage = React.lazy(() => import('./features/custom-bag/AdminCustomBagRequestsPage').then((module) => ({ default: module.AdminCustomBagRequestsPage })))
+const AdminCustomBagRequestDetailPage = React.lazy(() => import('./features/custom-bag/AdminCustomBagRequestDetailPage').then((module) => ({ default: module.AdminCustomBagRequestDetailPage })))
+
+const LazyPage: React.FC<React.PropsWithChildren> = ({ children }) => (
+  <React.Suspense fallback={<div className="py-16 text-center text-sm font-medium text-slate-500">Loading…</div>}>
+    {children}
+  </React.Suspense>
+)
+
+const CustomerOrStaffLayout: React.FC = () => {
   const { user } = useAuth()
-  return <Navigate to={user?.role === 'CUSTOMER' ? '/custom-bag' : '/dashboard'} replace />
+  return user?.role === 'CUSTOMER' ? <CustomerLayout /> : <AppLayout />
 }
 
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route element={<CustomerLayout />}>
+          <Route path="/home" element={<CustomerHomePage />} />
+        </Route>
 
         <Route element={<ProtectedRoute />}>
-          <Route element={<AppLayout />}>
-            <Route path="/" element={<HomeRedirect />} />
+          <Route element={<RoleRoute allowedRoles={CUSTOM_BAG_ROLES} />}>
+            <Route element={<CustomerOrStaffLayout />}>
+              <Route path="/custom-bag" element={<LazyPage><CustomBagPage /></LazyPage>} />
+            </Route>
+          </Route>
 
+          <Route element={<RoleRoute allowedRoles={CUSTOMER_ROLES} />}>
+            <Route element={<CustomerLayout />}>
+              <Route path="/my-custom-bags" element={<LazyPage><MyCustomBagRequestsPage /></LazyPage>} />
+              <Route path="/my-custom-bags/:id" element={<LazyPage><MyCustomBagRequestDetailPage /></LazyPage>} />
+            </Route>
+          </Route>
+
+          <Route element={<AppLayout />}>
             <Route element={<RoleRoute allowedRoles={MANAGEMENT_ROLES} />}>
               <Route path="/products" element={<ProductListPage />} />
               <Route path="/categories" element={<CategoryListPage />} />
@@ -71,14 +101,13 @@ export const App: React.FC = () => {
               <Route path="/sales/:id/edit" element={<SaleEditPage />} />
             </Route>
 
-            <Route element={<RoleRoute allowedRoles={CUSTOM_BAG_ROLES} />}>
-              <Route path="/custom-bag" element={<CustomBagPage />} />
+            <Route element={<RoleRoute allowedRoles={ADMIN_ROLES} />}>
+              <Route path="/custom-bag-requests" element={<LazyPage><AdminCustomBagRequestsPage /></LazyPage>} />
+              <Route path="/custom-bag-requests/:id" element={<LazyPage><AdminCustomBagRequestDetailPage /></LazyPage>} />
             </Route>
-
-            {/* Catch-all 404 */}
-            <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   )

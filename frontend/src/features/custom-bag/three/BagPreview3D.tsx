@@ -95,7 +95,7 @@ export function BagPreview3D({ configuration }: BagPreview3DProps) {
         </div>
       </div>
 
-      <div className="h-[420px] w-full sm:h-[500px]" aria-label="Interactive 3D model of a classic backpack">
+      <div className="h-[420px] w-full sm:h-[500px]" aria-label={`Interactive 3D model of ${template.label}`}>
         <SceneErrorBoundary>
           <Canvas
             camera={{ position: [6.4, 3.4, 7.2], fov: 38, near: 0.1, far: 50 }}

@@ -22,3 +22,38 @@
     background: #94a3b8;
   }
 }
+
+@keyframes storefront-brand-slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.storefront-brand-track {
+  animation: storefront-brand-slide 26s linear infinite;
+  will-change: transform;
+}
+
+.storefront-brand-track--reverse {
+  animation-direction: reverse;
+  animation-duration: 30s;
+}
+
+.storefront-brand-marquee:hover .storefront-brand-track,
+.storefront-brand-marquee:focus-within .storefront-brand-track {
+  animation-play-state: paused;
+}
+
+.storefront-brand-marquee {
+  mask-image: linear-gradient(to right, transparent, black 7%, black 93%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .storefront-brand-track {
+    animation: none;
+    transform: none;
+  }
+}

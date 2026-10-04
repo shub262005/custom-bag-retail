@@ -14,6 +14,8 @@ import {
   History,
   BarChart3,
   Palette,
+  ClipboardList,
+  ClipboardCheck,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -59,14 +61,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
             <img
               src="/roopam-logo.png"
-              alt="Roopam Bag Store Logo"
+              alt="Roopam Bag Mall Logo"
               className="w-full h-full object-contain"
             />
           </div>
           {!isCollapsed && (
             <div className="overflow-hidden whitespace-nowrap">
               <span className="text-sm font-bold text-slate-900 block leading-tight">
-                Roopam Bag Store
+                Roopam Bag Mall
               </span>
               <span className="text-[10px] text-orange-600 block font-semibold">Since 1967 • Retail POS</span>
             </div>
@@ -235,6 +237,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               </span>
             </div>
           )}
+        </NavLink>}
+        {isCustomer && <NavLink to="/my-custom-bags" className={navItemClass} title="My Custom Bag Requests">
+          <ClipboardList className="w-4 h-4 shrink-0" />
+          {!isCollapsed && <span>My Custom Bag Requests</span>}
+        </NavLink>}
+        {user?.role === 'ADMIN' && <NavLink to="/custom-bag-requests" className={navItemClass} title="Custom Bag Requests">
+          <ClipboardCheck className="w-4 h-4 shrink-0" />
+          {!isCollapsed && <span>Custom Bag Requests</span>}
         </NavLink>}
 
         {/* Reports */}

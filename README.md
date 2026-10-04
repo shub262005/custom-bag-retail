@@ -360,6 +360,39 @@ Run the complete real PostgreSQL authorization and sales regression set with:
 mvn test "-Dauth.postgres.tests=true" "-Dauthorization.postgres.tests=true" "-Dsales.postgres.tests=true"
 ```
 
+## Custom bag requests
+
+Authenticated customers can review a standard custom-bag design and submit it as multipart data to `POST /api/v1/custom-bag-requests`. The backend derives ownership from the JWT, recalculates the estimate from the selected template options, assigns a `CBR-YYYY-NNNNNN` request number, and persists the request with `SUBMITTED` status. It does not create products, reserve stock, or mutate sales, purchases, or inventory.
+
+The multipart fields are `request` (an `application/json` part) and optional `logo` (PNG or JPEG, at most 2 MB). Logos are stored under `${CUSTOM_BAG_LOGO_DIR:uploads/custom-bag-logos}` with generated names; only the local storage reference is persisted. `SPECIAL_DESIGN` is intentionally deferred.
+
+Run the opt-in real PostgreSQL custom-bag regression with:
+
+```powershell
+mvn test "-Dcustombag.postgres.tests=true" "-Dtest=CustomBagRequestPostgresRegressionTest"
+```
+
+Customers also have a read-only request history at `/my-custom-bags`. The customer APIs are owner-scoped using the authenticated JWT identity:
+
+| Method | Endpoint | Purpose |
+| :--- | :--- | :--- |
+| `GET` | `/api/v1/custom-bag-requests/mine` | Current customer's requests, newest first |
+| `GET` | `/api/v1/custom-bag-requests/mine/{id}` | Current customer's saved request details |
+| `GET` | `/api/v1/custom-bag-requests/mine/{id}/logo` | Authenticated logo stream for the owned request |
+
+The detail page maps the persisted configuration back into the existing `BagConfiguration` and reuses the same 3D renderer as the designer. Logos are fetched with the authenticated Axios client as blobs, displayed through temporary object URLs, and revoked when the detail view changes or unmounts. Cross-customer IDs return `404` without revealing whether another customer's request exists.
+
+Administrators have a protected review inbox at `/custom-bag-requests`. Its API is restricted to the `ADMIN` role; customers, cashiers, inventory managers, and anonymous callers cannot access it.
+
+| Method | Endpoint | Purpose |
+| :--- | :--- | :--- |
+| `GET` | `/api/v1/custom-bag-requests/admin` | List all requests; optionally filter by `status`, `requestNumber`, or customer name/email |
+| `GET` | `/api/v1/custom-bag-requests/admin/{id}` | Review a customer's immutable saved design |
+| `GET` | `/api/v1/custom-bag-requests/admin/{id}/logo` | Stream the protected logo for review |
+| `PATCH` | `/api/v1/custom-bag-requests/admin/{id}` | Update only `status` and `adminNote` (maximum 1000 characters) |
+
+The enforced workflow is `SUBMITTED -> REVIEWING -> APPROVED -> COMPLETED`; administrators may also reject from `SUBMITTED` or `REVIEWING`. `REJECTED`, `COMPLETED`, and `CANCELLED` are terminal. No reviewer-actor migration is introduced in this stage: status, admin note, and the existing update timestamp form the current review record.
+
 ---
 
 ## 📜 License

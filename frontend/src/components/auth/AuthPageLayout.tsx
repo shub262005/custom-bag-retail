@@ -8,6 +8,7 @@ interface AuthPageLayoutProps {
   footerText: string
   footerLinkText: string
   footerLinkTo: string
+  footerLinkState?: unknown
 }
 
 export const AuthPageLayout: React.FC<AuthPageLayoutProps> = ({
@@ -17,15 +18,16 @@ export const AuthPageLayout: React.FC<AuthPageLayoutProps> = ({
   footerText,
   footerLinkText,
   footerLinkTo,
+  footerLinkState,
 }) => (
   <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
     <div className="w-full max-w-md">
       <div className="flex items-center justify-center gap-3 mb-6">
         <div className="w-11 h-11 rounded-lg bg-white border border-slate-200 p-1 shadow-sm">
-          <img src="/roopam-logo.png" alt="Roopam Bag Store" className="w-full h-full object-contain" />
+          <img src="/roopam-logo.png" alt="Roopam Bag Mall" className="w-full h-full object-contain" />
         </div>
         <div>
-          <p className="text-base font-bold text-slate-900 leading-tight">Roopam Bag Store</p>
+          <p className="text-base font-bold text-slate-900 leading-tight">Roopam Bag Mall</p>
           <p className="text-xs font-medium text-orange-600">Since 1967</p>
         </div>
       </div>
@@ -40,7 +42,7 @@ export const AuthPageLayout: React.FC<AuthPageLayoutProps> = ({
 
       <p className="text-center text-sm text-slate-600 mt-5">
         {footerText}{' '}
-        <Link to={footerLinkTo} className="font-semibold text-blue-600 hover:text-blue-700">
+        <Link to={footerLinkTo} state={footerLinkState} className="font-semibold text-blue-600 hover:text-blue-700">
           {footerLinkText}
         </Link>
       </p>
