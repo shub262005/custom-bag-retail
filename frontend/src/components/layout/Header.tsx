@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({ isSidebarCollapsed }) => {
 
   return (
     <header
-      className={`fixed top-0 right-0 z-20 h-14 bg-white border-b border-slate-200 flex items-center justify-between px-6 transition-all duration-200 ease-in-out ${
+      className={`fixed top-0 right-0 z-20 h-14 bg-white/95 backdrop-blur-sm border-t-2 border-t-accent-400 border-b border-b-slate-200 flex items-center justify-between gap-2 px-3 sm:px-6 transition-all duration-200 ease-in-out ${
         isSidebarCollapsed ? 'left-16' : 'left-60'
       }`}
     >
@@ -93,6 +93,7 @@ export const Header: React.FC<HeaderProps> = ({ isSidebarCollapsed }) => {
             variant="ghost"
             leftIcon={<LogOut className="w-3.5 h-3.5" />}
             onClick={handleLogout}
+            aria-label="Sign out"
             title={user?.email ? `Sign out ${user.email}` : 'Sign out'}
           >
             <span className="hidden sm:inline">Logout</span>

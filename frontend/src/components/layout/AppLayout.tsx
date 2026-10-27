@@ -2,9 +2,13 @@ import React, { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
+import { PhoneScannerProvider } from '../../features/scanner/PhoneScannerContext'
+import { PhoneScannerHost } from '../products/PhoneScannerHost'
 
-export const AppLayout: React.FC = () => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+export const AppLayout: React.FC = () => <PhoneScannerProvider><StaffLayout /></PhoneScannerProvider>
+
+const StaffLayout: React.FC = () => {
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => window.matchMedia('(max-width: 1023px)').matches)
 
   const handleToggleSidebar = () => {
     setIsSidebarCollapsed((prev) => !prev)
@@ -28,8 +32,9 @@ export const AppLayout: React.FC = () => {
         <Header isSidebarCollapsed={isSidebarCollapsed} />
 
         {/* Page Content Canvas */}
-        <main className="flex-1 mt-14 p-6 overflow-y-auto">
+        <main className="flex-1 mt-14 p-4 sm:p-6 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
+            <PhoneScannerHost />
             <Outlet />
           </div>
         </main>

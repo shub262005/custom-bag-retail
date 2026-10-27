@@ -6,6 +6,7 @@ import com.inventory.inventorymanagement.exception.ResourceNotFoundException;
 import com.inventory.inventorymanagement.repository.*;
 import com.inventory.inventorymanagement.service.SaleNumberGenerator;
 import com.inventory.inventorymanagement.service.SaleService;
+import com.inventory.inventorymanagement.service.QuantityMath;
 import com.inventory.inventorymanagement.security.CurrentUserService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -272,7 +273,7 @@ public class SaleServiceImpl implements SaleService {
                 inventoryTransactionRepository.save(tx);
             } else if (delta < 0) {
                 int restoreQty = -delta;
-                int after = before + restoreQty;
+                int after = QuantityMath.add(before, restoreQty);
                 product.setStockQuantity(after);
                 productRepository.save(product);
 
@@ -380,7 +381,7 @@ public class SaleServiceImpl implements SaleService {
         for (SaleItem item : sale.getItems()) {
             Product product = productMap.get(item.getProduct().getId());
             int before = product.getStockQuantity() != null ? product.getStockQuantity() : 0;
-            int after = before + item.getQuantity();
+            int after = QuantityMath.add(before, item.getQuantity());
 
             product.setStockQuantity(after);
             productRepository.save(product);
@@ -644,7 +645,7 @@ public class SaleServiceImpl implements SaleService {
                             "Duplicate product id " + entry.getKey() + " with different selling prices is not allowed"
                     );
                 }
-                totalQty += req.getQuantity();
+                totalQty = QuantityMath.add(totalQty, req.getQuantity());
             }
             merged.add(new SaleItemRequest(entry.getKey(), totalQty, expectedPrice));
         }

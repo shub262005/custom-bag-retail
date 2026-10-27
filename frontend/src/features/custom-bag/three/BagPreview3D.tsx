@@ -5,6 +5,8 @@ import { Box } from 'lucide-react'
 import { ClassicBackpackModel } from './ClassicBackpackModel'
 import { DuffelBagModel } from './DuffelBagModel'
 import { LaptopBagModel } from './LaptopBagModel'
+import { ToteBagModel } from './ToteBagModel'
+import { SlingBagModel } from './SlingBagModel'
 import type { BagConfiguration } from './bagConfiguration'
 import { BAG_TEMPLATES } from './bagTemplates'
 
@@ -40,6 +42,10 @@ function SelectedBagModel({ configuration }: BagPreview3DProps) {
       return <LaptopBagModel configuration={configuration} />
     case 'DUFFEL_BAG':
       return <DuffelBagModel configuration={configuration} />
+    case 'TOTE_BAG':
+      return <ToteBagModel configuration={configuration} />
+    case 'SLING_BAG':
+      return <SlingBagModel configuration={configuration} />
     case 'BACKPACK':
     default:
       return <ClassicBackpackModel configuration={configuration} />
@@ -49,8 +55,8 @@ function SelectedBagModel({ configuration }: BagPreview3DProps) {
 function BackpackScene({ configuration }: BagPreview3DProps) {
   return (
     <>
-      <color attach="background" args={['#eef2f7']} />
-      <fog attach="fog" args={['#eef2f7', 11, 18]} />
+      <color attach="background" args={['#f2ece5']} />
+      <fog attach="fog" args={['#f2ece5', 11, 18]} />
       <ambientLight intensity={1.35} />
       <directionalLight
         castShadow

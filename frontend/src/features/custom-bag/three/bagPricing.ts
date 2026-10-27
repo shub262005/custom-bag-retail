@@ -4,7 +4,7 @@ import type {
   BagSize,
   CompartmentCount,
 } from './bagConfiguration'
-import { BAG_TEMPLATES } from './bagTemplates'
+import { BAG_TEMPLATES } from './bagTemplates.ts'
 
 export const BAG_PRICING = {
   size: {

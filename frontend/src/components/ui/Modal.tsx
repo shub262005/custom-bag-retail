@@ -66,15 +66,15 @@ export const Modal: React.FC<ModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className={`relative w-full ${sizeStyles[size]} bg-white rounded-lg border border-slate-200 shadow-lg z-10 flex flex-col max-h-[90vh] overflow-hidden`}
+        className={`relative w-full ${sizeStyles[size]} bg-white rounded-xl border border-slate-200 shadow-xl z-10 flex flex-col max-h-[90dvh] overflow-hidden`}
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+        <div className="shrink-0 px-5 py-4 border-b border-slate-200 flex items-start justify-between gap-4">
           <div>
             <h3 id="modal-title" className="text-base font-semibold text-slate-900">
               {title}
             </h3>
-            {description && <p className="text-xs text-slate-500 mt-0.5">{description}</p>}
+            {description && <p className="text-sm leading-5 text-slate-500 mt-1">{description}</p>}
           </div>
           <button
             type="button"
@@ -87,11 +87,11 @@ export const Modal: React.FC<ModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-5 overflow-y-auto">{children}</div>
+        <div className="min-h-0 p-5 overflow-y-auto overscroll-contain">{children}</div>
 
         {/* Footer */}
         {footer && (
-          <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3">
+          <div className="shrink-0 px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-end gap-2">
             {footer}
           </div>
         )}

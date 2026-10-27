@@ -27,6 +27,7 @@ import { SaleEditPage } from './pages/SaleEditPage'
 import { ReportsPage } from './pages/ReportsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { LoginPage } from './pages/LoginPage'
+import { PhoneScannerPage } from './features/scanner/PhoneScannerPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { CustomerHomePage } from './pages/CustomerHomePage'
 import type { UserRole } from './types'
@@ -60,6 +61,7 @@ export const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/phone-scanner" element={<PhoneScannerPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route element={<CustomerLayout />}>
           <Route path="/home" element={<CustomerHomePage />} />

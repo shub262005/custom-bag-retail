@@ -83,6 +83,8 @@ class ProductServiceTest {
         );
 
         when(productRepository.existsBySkuIgnoreCase("SKU-WH-001")).thenReturn(false);
+        when(productRepository.existsBySkuIgnoreCase("BARCODE-12345")).thenReturn(false);
+        when(productRepository.existsByBarcodeIgnoreCase("SKU-WH-001")).thenReturn(false);
         when(productRepository.existsByBarcodeIgnoreCase("BARCODE-12345")).thenReturn(false);
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(sampleCategory));
         when(brandRepository.findById(1L)).thenReturn(Optional.of(sampleBrand));
@@ -146,6 +148,7 @@ class ProductServiceTest {
         );
 
         when(productRepository.existsBySkuIgnoreCase("SKU-UNIQUE")).thenReturn(false);
+        when(productRepository.existsByBarcodeIgnoreCase("SKU-UNIQUE")).thenReturn(false);
         when(categoryRepository.findById(2L)).thenReturn(Optional.of(inactiveCategory));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
@@ -199,6 +202,7 @@ class ProductServiceTest {
         );
 
         when(productRepository.existsBySkuIgnoreCase("SKU-UNIQUE")).thenReturn(false);
+        when(productRepository.existsByBarcodeIgnoreCase("SKU-UNIQUE")).thenReturn(false);
         when(productRepository.existsByBarcodeIgnoreCase("BARCODE-12345")).thenReturn(true);
 
         assertThrows(DuplicateResourceException.class, () -> productService.createProduct(request));
@@ -311,6 +315,8 @@ class ProductServiceTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
         when(productRepository.existsBySkuIgnoreCaseAndIdNot("SKU-WH-001", 1L)).thenReturn(false);
         when(productRepository.existsByBarcodeIgnoreCaseAndIdNot("BARCODE-12345", 1L)).thenReturn(false);
+        when(productRepository.existsByBarcodeIgnoreCaseAndIdNot("SKU-WH-001", 1L)).thenReturn(false);
+        when(productRepository.existsBySkuIgnoreCaseAndIdNot("BARCODE-12345", 1L)).thenReturn(false);
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(sampleCategory));
         when(brandRepository.findById(1L)).thenReturn(Optional.of(sampleBrand));
         when(productRepository.save(any(Product.class))).thenReturn(sampleProduct);
@@ -410,5 +416,38 @@ class ProductServiceTest {
 
         assertTrue(responses.isEmpty());
         verify(productRepository, never()).searchProducts(any());
+    }
+
+    private ProductRequest registrationRequest(String sku, String barcode) {
+        return new ProductRequest("Test bag", sku, barcode, 1L, null, null, null,
+                new BigDecimal("10.00"), new BigDecimal("20.00"), 5, null, ProductStatus.ACTIVE);
+    }
+
+    @Test void createRejectsSkuMatchingAnotherProductsBarcode() {
+        when(productRepository.existsByBarcodeIgnoreCase("OLD-BARCODE")).thenReturn(true);
+        assertThrows(DuplicateResourceException.class, () -> productService.createProduct(registrationRequest("OLD-BARCODE", "NEW-CODE")));
+        verify(productRepository, never()).save(any());
+    }
+
+    @Test void createRejectsBarcodeMatchingAnotherProductsSku() {
+        when(productRepository.existsBySkuIgnoreCase("NEW-SKU")).thenReturn(false);
+        when(productRepository.existsBySkuIgnoreCase("OLD-SKU")).thenReturn(true);
+        assertThrows(DuplicateResourceException.class, () -> productService.createProduct(registrationRequest("NEW-SKU", "OLD-SKU")));
+        verify(productRepository, never()).save(any());
+    }
+
+    @Test void updateRejectsSkuMatchingAnotherProductsBarcode() {
+        when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+        when(productRepository.existsByBarcodeIgnoreCaseAndIdNot("OLD-BARCODE", 1L)).thenReturn(true);
+        assertThrows(DuplicateResourceException.class, () -> productService.updateProduct(1L, registrationRequest("OLD-BARCODE", "NEW-CODE")));
+        verify(productRepository, never()).save(any());
+    }
+
+    @Test void updateRejectsBarcodeMatchingAnotherProductsSku() {
+        when(productRepository.findById(1L)).thenReturn(Optional.of(sampleProduct));
+        when(productRepository.existsBySkuIgnoreCaseAndIdNot("NEW-SKU", 1L)).thenReturn(false);
+        when(productRepository.existsBySkuIgnoreCaseAndIdNot("OLD-SKU", 1L)).thenReturn(true);
+        assertThrows(DuplicateResourceException.class, () -> productService.updateProduct(1L, registrationRequest("NEW-SKU", "OLD-SKU")));
+        verify(productRepository, never()).save(any());
     }
 }

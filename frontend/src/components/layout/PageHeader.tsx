@@ -23,7 +23,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   return (
     <div className="mb-6">
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs text-slate-500 mb-2">
+        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-xs text-slate-500 mb-3">
           {breadcrumbs.map((item, index) => {
             const isLast = index === breadcrumbs.length - 1
             return (
@@ -44,10 +44,10 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">{title}</h1>
-          {description && <p className="text-xs text-slate-500 mt-0.5">{description}</p>}
+          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{title}</h1>
+          {description && <p className="max-w-3xl text-sm leading-6 text-slate-500 mt-1">{description}</p>}
         </div>
-        {actions && <div className="flex items-center gap-2.5 shrink-0">{actions}</div>}
+        {actions && <div className="flex flex-wrap items-center gap-2.5 shrink-0">{actions}</div>}
       </div>
     </div>
   )

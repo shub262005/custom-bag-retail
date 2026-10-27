@@ -21,6 +21,17 @@ class CustomBagPricingServiceTest {
         assertEquals(new BigDecimal("1200.00"), pricing.calculate(request(CustomBagType.BACKPACK), false));
         assertEquals(new BigDecimal("1400.00"), pricing.calculate(request(CustomBagType.LAPTOP_BAG), false));
         assertEquals(new BigDecimal("1600.00"), pricing.calculate(request(CustomBagType.DUFFEL_BAG), false));
+        assertEquals(new BigDecimal("900.00"), pricing.calculate(request(CustomBagType.TOTE_BAG), false));
+        assertEquals(new BigDecimal("1000.00"), pricing.calculate(request(CustomBagType.SLING_BAG), false));
+    }
+
+    @Test void newModelUpgradesMatchTheFrontendEstimate() {
+        for (CustomBagType type : new CustomBagType[]{CustomBagType.TOTE_BAG, CustomBagType.SLING_BAG}) {
+            var r = request(type);
+            r.setSize(CustomBagSize.MEDIUM); r.setMaterial(CustomBagMaterial.CANVAS);
+            r.setCompartmentCount(2); r.setFrontPocket(true); r.setWaterResistant(true); r.setCustomText("ROOPAM");
+            assertEquals(new BigDecimal(type == CustomBagType.TOTE_BAG ? "1850.00" : "1950.00"), pricing.calculate(r, true));
+        }
     }
 
     static CustomBagRequestCreateRequest request(CustomBagType type) {

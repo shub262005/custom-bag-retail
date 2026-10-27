@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Modal } from '../../components/ui/Modal'
 import { Input } from '../../components/ui/Input'
 import { Select } from '../../components/ui/Select'
@@ -11,6 +11,10 @@ import { useToast } from '../../context/ToastContext'
 import { getErrorMessage, getValidationErrors } from '../../api/errorParser'
 import { Info, AlertTriangle } from 'lucide-react'
 import type { ProductResponse, ProductRequest, ProductStatus } from '../../types'
+import { CameraScanner } from '../../components/products/CameraScanner'
+import { PhoneScannerConnection } from '../../components/products/PhoneScannerConnection'
+import { validateRegistrationCode } from '../../components/products/productScan'
+import type { ScanOutcome } from '../scanner/scannerApi'
 
 export interface ProductFormModalProps {
   isOpen: boolean
@@ -26,7 +30,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const isEditing = !!productToEdit
   const toast = useToast()
 
-  const { createProductMutation, updateProductMutation } = useProducts()
+  const { productsQuery, createProductMutation, updateProductMutation } = useProducts()
 
   // Load active categories and brands for selectors
   const { categoriesQuery } = useCategories('ACTIVE')
@@ -36,6 +40,9 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [name, setName] = useState('')
   const [sku, setSku] = useState('')
   const [barcode, setBarcode] = useState('')
+  const [cameraOpen, setCameraOpen] = useState(false)
+  const [scanNotice, setScanNotice] = useState('')
+  const [cameraError, setCameraError] = useState('')
   const [categoryId, setCategoryId] = useState<string>('')
   const [brandId, setBrandId] = useState<string>('')
   const [color, setColor] = useState('')
@@ -45,11 +52,20 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [minimumStock, setMinimumStock] = useState<string>('5')
   const [imageUrl, setImageUrl] = useState('')
   const [status, setStatus] = useState<ProductStatus>('ACTIVE')
+  const saving = useRef(false)
 
   // Validation states
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [serverError, setServerError] = useState<string | null>(null)
   const [serverValidationErrors, setServerValidationErrors] = useState<Record<string, string> | undefined>(undefined)
+
+  function resetNewProduct() {
+    setName(''); setSku(''); setBarcode(''); setCategoryId(''); setBrandId('')
+    setColor(''); setCapacity(''); setPurchasePrice(''); setSellingPrice('')
+    setMinimumStock('5'); setImageUrl(''); setStatus('ACTIVE')
+    setCameraOpen(false); setScanNotice(''); setCameraError('')
+    setFieldErrors({}); setServerError(null); setServerValidationErrors(undefined)
+  }
 
   useEffect(() => {
     if (productToEdit) {
@@ -66,22 +82,14 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setImageUrl(productToEdit.imageUrl || '')
       setStatus(productToEdit.status || 'ACTIVE')
     } else {
-      setName('')
-      setSku('')
-      setBarcode('')
-      setCategoryId('')
-      setBrandId('')
-      setColor('')
-      setCapacity('')
-      setPurchasePrice('')
-      setSellingPrice('')
-      setMinimumStock('5')
-      setImageUrl('')
-      setStatus('ACTIVE')
+      resetNewProduct()
     }
     setFieldErrors({})
     setServerError(null)
     setServerValidationErrors(undefined)
+    setCameraOpen(false)
+    setScanNotice('')
+    setCameraError('')
   }, [productToEdit, isOpen])
 
   const validate = (): boolean => {
@@ -105,6 +113,16 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
     if (barcode.trim().length > 50) {
       errors.barcode = 'Barcode must be at most 50 characters'
+    } else if (barcode.trim()) {
+      if (!productsQuery.data || productsQuery.isError) errors.barcode = 'Load the product catalog to check this barcode before saving.'
+      else {
+        const result = validateRegistrationCode(productsQuery.data, barcode, productToEdit?.id)
+        if (result.error) errors.barcode = result.error
+      }
+    }
+    if (!errors.sku && productsQuery.data) {
+      const result = validateRegistrationCode(productsQuery.data, sku, productToEdit?.id)
+      if (result.error) errors.sku = result.error
     }
 
     if (!categoryId) {
@@ -129,9 +147,9 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       errors.sellingPrice = 'Selling price must be greater than 0'
     }
 
-    const minStock = parseInt(minimumStock, 10)
-    if (isNaN(minStock) || minStock < 0) {
-      errors.minimumStock = 'Minimum stock must be greater than or equal to 0'
+    const minStock = Number(minimumStock)
+    if (!minimumStock.trim() || !Number.isSafeInteger(minStock) || minStock < 0 || minStock > 2147483647) {
+      errors.minimumStock = 'Minimum stock must be a whole number from 0 to 2147483647'
     }
 
     if (imageUrl.trim().length > 255) {
@@ -143,10 +161,30 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   }
 
   const isSubmitting = createProductMutation.isPending || updateProductMutation.isPending
+  const scannerDisabled = isSubmitting || !isOpen || productsQuery.isPending || productsQuery.isError
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const captureBarcode = (raw: string): ScanOutcome => {
+    setCameraOpen(false)
+    setScanNotice('')
+    setCameraError('')
+    if (scannerDisabled) return { accepted: false, message: 'Product form is busy or the catalog is unavailable. Try again when ready.' }
+    const result = validateRegistrationCode(productsQuery.data ?? [], raw, productToEdit?.id, barcode)
+    if (result.error) {
+      setFieldErrors(prev => ({ ...prev, barcode: result.error! }))
+      return { accepted: false, message: result.error }
+    }
+    setBarcode(result.code!)
+    setFieldErrors(prev => ({ ...prev, barcode: '' }))
+    const message = `Barcode "${result.code}" filled. Complete details on the PC and choose Save & Add Another to keep scanning.`
+    setScanNotice(message)
+    return { accepted: true, message }
+  }
+
+  const handleSubmit = async (e: React.FormEvent, addAnother = false) => {
     e.preventDefault()
-    if (!validate() || isSubmitting) return
+    if (saving.current || isSubmitting || !validate()) return
+    saving.current = true
+    setCameraOpen(false)
 
     const payload: ProductRequest = {
       name: name.trim(),
@@ -158,7 +196,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       capacity: capacity.trim() ? capacity.trim() : undefined,
       purchasePrice: parseFloat(purchasePrice),
       sellingPrice: parseFloat(sellingPrice),
-      minimumStock: parseInt(minimumStock, 10),
+      minimumStock: Number(minimumStock),
       imageUrl: imageUrl.trim() ? imageUrl.trim() : undefined,
       status,
     }
@@ -174,7 +212,10 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         await createProductMutation.mutateAsync(payload)
         toast.success(`Product "${payload.name}" created successfully.`)
       }
-      onClose()
+      if (addAnother && !isEditing) {
+        resetNewProduct()
+        setScanNotice(`Saved "${payload.name}". Phone stays paired. Scan the next product.`)
+      } else onClose()
     } catch (err) {
       const msg = getErrorMessage(err)
       const valErrors = getValidationErrors(err)
@@ -183,7 +224,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       if (valErrors) {
         setFieldErrors((prev) => ({ ...prev, ...valErrors }))
       }
-    }
+    } finally { saving.current = false }
   }
 
   // Active categories list
@@ -225,36 +266,36 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
           ? 'Update product details, pricing, and minimum stock threshold. Stock levels remain unchanged.'
           : 'Register a new bag product in the store catalog.'
       }
-      size="lg"
+      size="xl"
       footer={
         <>
-          <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>
+          <Button variant="ghost" className="mr-auto" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>
           <Button
-            variant="primary"
-            onClick={handleSubmit}
+            variant={isEditing ? 'primary' : 'secondary'}
+            onClick={e => void handleSubmit(e)}
             isLoading={isSubmitting}
             disabled={isSubmitting}
           >
-            {isEditing ? 'Save Changes' : 'Create Product'}
+            {isEditing ? 'Save Changes' : 'Save & Close'}
           </Button>
+          {!isEditing && <Button variant="primary" onClick={e => void handleSubmit(e, true)} disabled={isSubmitting} isLoading={isSubmitting}>Save &amp; Add Another</Button>}
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={e => void handleSubmit(e, !isEditing)} className="space-y-4">
         {/* Critical Stock Rule Callout */}
         <div className="flex items-start gap-2.5 p-3 bg-blue-50 border border-blue-200 rounded-md text-xs text-blue-800">
           <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
           <div className="leading-relaxed">
             {isEditing ? (
               <span>
-                <strong>Stock Immutability:</strong> Current warehouse stock is{' '}
-                <strong>{productToEdit?.stockQuantity ?? 0} units</strong>. Editing product details does not modify stock. Stock is adjusted exclusively via Purchases and Inventory transactions.
+                Current stock: <strong>{productToEdit?.stockQuantity ?? 0} units</strong>. To change stock, use Purchases or Inventory transactions.
               </span>
             ) : (
               <span>
-                <strong>Initial Stock Rule:</strong> New products start with <strong>0 stock</strong>. Stock is added through Purchases and Inventory transactions.
+                New products start with <strong>0 stock</strong>. Add stock through Purchases or Inventory transactions after saving.
               </span>
             )}
           </div>
@@ -317,8 +358,11 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             value={barcode}
             onChange={(e) => {
               setBarcode(e.target.value)
+              setScanNotice('')
               if (fieldErrors.barcode) setFieldErrors((prev) => ({ ...prev, barcode: '' }))
             }}
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); captureBarcode(e.currentTarget.value) } }}
+            helperText="Focus here for a physical scanner with Enter suffix, or use the camera/phone scanner below."
             error={fieldErrors.barcode}
             disabled={isSubmitting}
           />
@@ -342,6 +386,18 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
         </div>
 
         {/* Row 3: Brand & Color */}
+        <section aria-label="Register product barcode by scanning" className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <div><h4 className="text-sm font-semibold text-slate-900">Scan a product label</h4><p className="mt-1 text-sm text-slate-500">Fill the barcode using a camera or your paired phone.</p></div>
+          <Button variant="secondary" size="sm" disabled={scannerDisabled} onClick={() => { setCameraError(''); setCameraOpen(value => !value) }}>{cameraOpen ? 'Stop camera' : 'Use this device’s camera'}</Button>
+          {productsQuery.isPending && <p role="status" className="text-xs text-slate-600">Loading product codes…</p>}
+          {productsQuery.isError && <ErrorAlert message="Could not load product codes for duplicate checking." onRetry={() => productsQuery.refetch()} />}
+          {cameraOpen && !scannerDisabled && <CameraScanner onScan={captureBarcode} onError={message => { setCameraOpen(false); setCameraError(message) }} />}
+          {cameraError && <p role="alert" className="text-sm text-red-700">{cameraError}</p>}
+          {scanNotice && <p role="status" className="text-sm text-emerald-700">{scanNotice}</p>}
+          <PhoneScannerConnection key={productToEdit?.id ?? 'new-product'} label={isEditing ? `Products · edit ${productToEdit.name}` : 'Products · register new product'} disabled={scannerDisabled || (!isEditing && !!barcode.trim())} pauseReason={!isEditing && barcode.trim() && !scannerDisabled ? 'Barcode received · complete this product on the PC, then choose Save & Add Another to enable Scan next product on your phone.' : undefined} onScan={captureBarcode} />
+          <details className="text-xs leading-5 text-slate-500"><summary className="w-fit cursor-pointer font-medium text-slate-600">Scanning help</summary><p className="mt-2">Start a phone scan on the phone’s scanner page. The camera button above uses this device’s camera. Codes already used by another product are rejected. For multiple products, choose Save &amp; Add Another; your phone stays paired.</p></details>
+        </section>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Select
             label="Brand (Optional)"

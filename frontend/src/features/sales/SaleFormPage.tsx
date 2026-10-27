@@ -19,6 +19,7 @@ import type { SaleResponse, SaleEditRequest } from '../../types/sale.types'
 import type { PaymentMethod } from '../../types/common.types'
 import { useSale, useCreateSale, useUpdateSale, validSaleId } from './useSales'
 import { localToday, paymentOptions, paymentLabel, roundMoney } from './saleForm'
+import { ProductScanner } from '../../components/products/ProductScanner'
 
 interface Row { productId: number; name: string; sku: string; quantity: string; price: string }
 export function SaleFormPage({ mode = 'create' }: { mode?: 'create' | 'edit' }) {
@@ -67,7 +68,7 @@ function SaleForm({ original }: { original?: SaleResponse }) {
   function add(product: ProductResponse) {
     const row = rows.find(r => r.productId === product.id)
     const quantity = row ? Number(row.quantity) + 1 : 1
-    if (!Number.isInteger(quantity) || quantity > available(product.id)) { setError('Requested quantity exceeds available stock.'); return }
+    if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > available(product.id)) { const message = 'Requested quantity exceeds available stock or the current quantity is invalid.'; setError(message); return message }
     setError('')
     setRows(prev => row ? prev.map(r => r.productId === product.id ? { ...r, quantity: String(quantity) } : r) : [...prev, { productId: product.id, name: product.name, sku: product.sku, quantity: '1', price: String(product.sellingPrice) }])
   }
@@ -113,6 +114,7 @@ function SaleForm({ original }: { original?: SaleResponse }) {
     <fieldset disabled={pending} className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-5 disabled:opacity-70">
       <div className="space-y-4 min-w-0">
         <section className="p-4 bg-white border border-slate-200 rounded-lg space-y-3">
+          <ProductScanner label={original ? `Edit sale ${original.saleNumber}` : 'Sales · POS checkout'} products={products} disabled={pending || review || catalogue.isPending || catalogue.isError} onProduct={add} />
           <Input label="Product search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Name, SKU or barcode" onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }} />
           {results.isPending ? <SkeletonTable rows={3} cols={4} /> : results.isError ? <ErrorAlert message={getErrorMessage(results.error)} onRetry={() => results.refetch()} /> : !visible.length ? <EmptyState title="No active products found" description="Try another name, SKU or barcode." /> : <div className="max-h-64 overflow-auto"><Table><TableHeader><TableRow><TableHead>Product</TableHead><TableHead>Price / Stock</TableHead><TableHead>Add</TableHead></TableRow></TableHeader><TableBody>{visible.map(p => <TableRow key={p.id}><TableCell><div className="font-medium">{p.name}</div><div className="text-xs text-slate-500">{p.sku} · {p.barcode || 'No barcode'}</div></TableCell><TableCell>{formatINR(p.sellingPrice)}<div className={`text-xs ${p.stockQuantity <= p.minimumStock ? 'text-amber-700' : 'text-slate-500'}`}>{p.stockQuantity} in stock · {p.stockQuantity === 0 ? 'Out of stock' : p.stockQuantity <= p.minimumStock ? 'Low stock' : 'Available'}</div></TableCell><TableCell><Button type="button" size="sm" aria-label={`Add ${p.name}`} disabled={catalogue.isPending || catalogue.isError || p.stockQuantity === 0 || Number(rows.find(r => r.productId === p.id)?.quantity ?? 0) >= available(p.id)} onClick={() => add(p)}>Add</Button></TableCell></TableRow>)}</TableBody></Table></div>}
         </section>

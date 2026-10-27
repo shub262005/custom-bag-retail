@@ -38,25 +38,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
   const navItemClass = ({ isActive }: { isActive: boolean }) =>
     `flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors select-none ${
       isActive
-        ? 'bg-blue-50 text-blue-700 font-medium'
-        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+        ? 'bg-sidebar-hover text-sidebar-active font-semibold shadow-[inset_3px_0_0_#d9b86c]'
+        : 'text-sidebar-text hover:text-white hover:bg-sidebar-hover'
     }`
 
   const subNavItemClass = ({ isActive }: { isActive: boolean }) =>
     `flex items-center gap-2.5 px-3 py-1.5 text-xs rounded-md transition-colors select-none ${
       isActive
-        ? 'bg-blue-50 text-blue-700 font-medium'
-        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+        ? 'bg-sidebar-hover text-sidebar-active font-semibold shadow-[inset_3px_0_0_#d9b86c]'
+        : 'text-sidebar-muted hover:text-white hover:bg-sidebar-hover'
     }`
 
   return (
     <aside
-      className={`fixed top-0 left-0 bottom-0 z-30 bg-white border-r border-slate-200 flex flex-col transition-all duration-200 ease-in-out ${
+      className={`fixed top-0 left-0 bottom-0 z-30 bg-sidebar border-r border-sidebar-line flex flex-col transition-all duration-200 ease-in-out ${
         isCollapsed ? 'w-16' : 'w-60'
       }`}
     >
       {/* Store Branding Header */}
-      <div className="h-14 border-b border-slate-200 flex items-center px-3.5 justify-between shrink-0">
+      <div className="h-14 border-b border-sidebar-line flex items-center px-3.5 justify-between shrink-0">
         <div className="flex items-center gap-2.5 overflow-hidden">
           <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
             <img
@@ -67,10 +67,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           </div>
           {!isCollapsed && (
             <div className="overflow-hidden whitespace-nowrap">
-              <span className="text-sm font-bold text-slate-900 block leading-tight">
+              <span className="font-display text-base font-semibold text-white block leading-tight">
                 Roopam Bag Mall
               </span>
-              <span className="text-[10px] text-orange-600 block font-semibold">Since 1967 • Retail POS</span>
+              <span className="text-[10px] text-accent-300 block font-medium tracking-wide">Since 1967 • Retail POS</span>
             </div>
           )}
         </div>
@@ -100,14 +100,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               <button
                 type="button"
                 onClick={() => setProductsOpen(!productsOpen)}
-                className="w-full flex items-center justify-between px-3 py-2 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors select-none"
+                className="w-full flex items-center justify-between px-3 py-2 text-sm text-sidebar-text hover:text-white hover:bg-sidebar-hover rounded-md transition-colors select-none"
               >
                 <div className="flex items-center gap-3">
-                  <Package className="w-4 h-4 text-slate-500 shrink-0" />
+                  <Package className="w-4 h-4 text-sidebar-muted shrink-0" />
                   <span>Products</span>
                 </div>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-150 ${
+                  className={`w-3.5 h-3.5 text-sidebar-muted transition-transform duration-150 ${
                     productsOpen ? 'rotate-180' : ''
                   }`}
                 />
@@ -143,14 +143,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               <button
                 type="button"
                 onClick={() => setInventoryOpen(!inventoryOpen)}
-                className="w-full flex items-center justify-between px-3 py-2 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors select-none"
+                className="w-full flex items-center justify-between px-3 py-2 text-sm text-sidebar-text hover:text-white hover:bg-sidebar-hover rounded-md transition-colors select-none"
               >
                 <div className="flex items-center gap-3">
-                  <Warehouse className="w-4 h-4 text-slate-500 shrink-0" />
+                  <Warehouse className="w-4 h-4 text-sidebar-muted shrink-0" />
                   <span>Inventory</span>
                 </div>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-150 ${
+                  className={`w-3.5 h-3.5 text-sidebar-muted transition-transform duration-150 ${
                     inventoryOpen ? 'rotate-180' : ''
                   }`}
                 />
@@ -196,14 +196,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
               <button
                 type="button"
                 onClick={() => setSalesOpen(!salesOpen)}
-                className="w-full flex items-center justify-between px-3 py-2 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-md transition-colors select-none"
+                className="w-full flex items-center justify-between px-3 py-2 text-sm text-sidebar-text hover:text-white hover:bg-sidebar-hover rounded-md transition-colors select-none"
               >
                 <div className="flex items-center gap-3">
-                  <ShoppingBag className="w-4 h-4 text-slate-500 shrink-0" />
+                  <ShoppingBag className="w-4 h-4 text-sidebar-muted shrink-0" />
                   <span>Sales</span>
                 </div>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-150 ${
+                  className={`w-3.5 h-3.5 text-sidebar-muted transition-transform duration-150 ${
                     salesOpen ? 'rotate-180' : ''
                   }`}
                 />
@@ -254,12 +254,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
       </nav>
 
       {/* Collapse Toggle Footer */}
-      <div className="p-2 border-t border-slate-200 shrink-0">
+      <div className="p-2 border-t border-sidebar-line shrink-0">
         <button
           type="button"
           onClick={onToggleCollapse}
           aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          className="w-full flex items-center justify-center p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-md transition-colors"
+          className="w-full flex items-center justify-center p-2 text-sidebar-muted hover:text-white hover:bg-sidebar-hover rounded-md transition-colors"
         >
           {isCollapsed ? (
             <ChevronRight className="w-4 h-4" />

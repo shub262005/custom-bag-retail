@@ -98,6 +98,16 @@ class InventoryTransactionServiceTest {
         verify(inventoryTransactionRepository).save(any(InventoryTransaction.class));
     }
 
+    @Test void stockInOverflowIsRejectedBeforeAnyStockOrLedgerWrite() {
+        activeProduct.setStockQuantity(Integer.MAX_VALUE);
+        when(productRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(activeProduct));
+        var request = new InventoryTransactionRequest(1L, TransactionType.STOCK_IN, 1, "Restock", null, null);
+        assertThrows(IllegalArgumentException.class, () -> inventoryTransactionService.createTransaction(request));
+        assertEquals(Integer.MAX_VALUE, activeProduct.getStockQuantity());
+        verify(productRepository, never()).save(any());
+        verify(inventoryTransactionRepository, never()).save(any());
+    }
+
     @Test
     void createTransaction_StockOut_Success() {
         InventoryTransactionRequest request = new InventoryTransactionRequest(

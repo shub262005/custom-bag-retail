@@ -15,6 +15,8 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { ErrorAlert } from '../../components/ui/ErrorAlert'
 import { useSuppliers } from '../suppliers/useSuppliers'
 import { useProducts } from '../products/useProducts'
+import { ProductScanner } from '../../components/products/ProductScanner'
+import type { ProductResponse } from '../../types/product.types'
 import {
   usePurchase,
   useCreatePurchase,
@@ -195,6 +197,20 @@ export const PurchaseFormPage: React.FC<PurchaseFormPageProps> = ({ mode = 'crea
   }, [items])
 
   // Row item actions
+  const handleScannedProduct = (product: ProductResponse): string | undefined => {
+    const existing = items.find(row => row.productId === String(product.id))
+    const quantity = existing ? Number(existing.quantity) + 1 : 1
+    if (!Number.isSafeInteger(quantity) || quantity < 1) return 'Fix the current product quantity before scanning another unit.'
+    setItems(prev => {
+      if (existing) return prev.map(row => row.productId === String(product.id) ? { ...row, quantity: String(Number(row.quantity) + 1) } : row)
+      const empty = prev.find(row => !row.productId)
+      const row: FormItemRow = { tempId: empty?.tempId ?? `scan-${Date.now()}-${Math.random().toString(36).slice(2)}`, productId: String(product.id), quantity: '1', purchasePrice: String(product.purchasePrice ?? 0) }
+      return empty ? prev.map(item => item.tempId === empty.tempId ? row : item) : [...prev, row]
+    })
+    setClientErrors({})
+    return undefined
+  }
+
   const handleAddItem = () => {
     const newId = `row-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`
     setItems((prev) => [
@@ -645,6 +661,7 @@ export const PurchaseFormPage: React.FC<PurchaseFormPageProps> = ({ mode = 'crea
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
+                <ProductScanner label={mode === 'edit' ? 'Purchases · edit purchase' : 'Purchases · new purchase'} products={activeProducts} disabled={isPending || isConfirmOpen || productsQuery.isPending || productsQuery.isError} onProduct={handleScannedProduct} />
                 {clientErrors.items && (
                   <p className="text-xs text-red-600 font-medium">{clientErrors.items}</p>
                 )}

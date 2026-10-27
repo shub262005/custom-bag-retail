@@ -225,6 +225,29 @@ class CustomBagRequestPostgresRegressionTest {
                 .andExpect(jsonPath("$.status").value(401));
     }
 
+    @Test void toteAndSlingRequestsPersistAndReloadAfterTheNewMigration() throws Exception {
+        String marker = UUID.randomUUID().toString().replace("-", "");
+        AppUser customer = users.saveAndFlush(new AppUser("New Model Customer", "new-model-" + marker + "@roopam.local",
+                passwordEncoder.encode(PASSWORD), UserRole.CUSTOMER, UserStatus.ACTIVE));
+        String token = tokens.generate(customer);
+        for (String type : new String[]{"TOTE_BAG", "SLING_BAG"}) {
+            var response = submit(token, """
+                    {"bagType":"%s","size":"MEDIUM","material":"CANVAS","bodyColor":"NAVY",
+                     "pocketColor":"BLUE","strapColor":"BLACK","frontPocket":true,"sidePockets":false,
+                     "compartmentCount":2,"laptopPadding":false,"waterResistant":true,
+                     "customText":"MY BAG","textColor":"WHITE","textPosition":"CENTER"}
+                    """.formatted(type), null);
+            long id = response.get("id").asLong();
+            entityManager.flush(); entityManager.clear();
+            assertEquals(CustomBagType.valueOf(type), requests.findById(id).orElseThrow().getBagType());
+            mockMvc.perform(get("/api/v1/custom-bag-requests/mine/" + id).header("Authorization", "Bearer " + token))
+                    .andExpect(status().isOk()).andExpect(jsonPath("$.bagType").value(type))
+                    .andExpect(jsonPath("$.compartmentCount").value(2))
+                    .andExpect(jsonPath("$.customText").value("MY BAG"))
+                    .andExpect(jsonPath("$.estimatedPrice").value(type.equals("TOTE_BAG") ? 1650 : 1750));
+        }
+    }
+
     private JsonNode submit(String token, String body, MockMultipartFile logo) throws Exception {
         var builder = multipart("/api/v1/custom-bag-requests").file(jsonPart(body));
         if (logo != null) builder.file(logo);

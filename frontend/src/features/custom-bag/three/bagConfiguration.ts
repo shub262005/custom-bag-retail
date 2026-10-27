@@ -1,6 +1,6 @@
 export type BagSize = 'SMALL' | 'MEDIUM' | 'LARGE'
 
-export type BagType = 'BACKPACK' | 'LAPTOP_BAG' | 'DUFFEL_BAG'
+export type BagType = 'BACKPACK' | 'LAPTOP_BAG' | 'DUFFEL_BAG' | 'TOTE_BAG' | 'SLING_BAG'
 
 export type BagColor = 'BLACK' | 'NAVY' | 'BLUE' | 'RED' | 'GREEN' | 'GRAY' | 'BROWN'
 

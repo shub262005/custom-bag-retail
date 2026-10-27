@@ -1,9 +1,89 @@
 @import "tailwindcss";
 
+/* Roopam: burgundy leather, brass details and warm paper surfaces. */
+@theme {
+  --font-display: Georgia, "Times New Roman", serif;
+  --color-brand-50: #fcf5f3;
+  --color-brand-100: #f7e8e5;
+  --color-brand-200: #ecd0ca;
+  --color-brand-300: #dca8a1;
+  --color-brand-400: #bf7772;
+  --color-brand-500: #a64f52;
+  --color-brand-600: #873d46;
+  --color-brand-700: #6f2d3b;
+  --color-brand-800: #592535;
+  --color-brand-900: #43202c;
+  --color-brand-950: #29131c;
+
+  /* Existing primary-color utilities share the brand palette. */
+  --color-blue-50: var(--color-brand-50);
+  --color-blue-100: var(--color-brand-100);
+  --color-blue-200: var(--color-brand-200);
+  --color-blue-300: var(--color-brand-300);
+  --color-blue-400: var(--color-brand-400);
+  --color-blue-500: var(--color-brand-500);
+  --color-blue-600: var(--color-brand-600);
+  --color-blue-700: var(--color-brand-700);
+  --color-blue-800: var(--color-brand-800);
+  --color-blue-900: var(--color-brand-900);
+  --color-blue-950: var(--color-brand-950);
+  --color-rose-50: var(--color-brand-50);
+  --color-rose-100: var(--color-brand-100);
+  --color-rose-200: var(--color-brand-200);
+  --color-rose-300: var(--color-brand-300);
+  --color-rose-400: var(--color-brand-400);
+  --color-rose-500: var(--color-brand-500);
+  --color-rose-600: var(--color-brand-600);
+  --color-rose-700: var(--color-brand-700);
+  --color-rose-800: var(--color-brand-800);
+  --color-rose-900: var(--color-brand-900);
+  --color-rose-950: var(--color-brand-950);
+
+  --color-accent-50: #fbf7ec;
+  --color-accent-100: #f5eacb;
+  --color-accent-200: #e9d498;
+  --color-accent-300: #d9b86c;
+  --color-accent-400: #c49d4f;
+  --color-accent-500: #aa8035;
+  --color-accent-600: #8a6327;
+  --color-accent-700: #6d4a23;
+  --color-accent-800: #583c23;
+  --color-accent-900: #493322;
+  --color-accent-950: #2c1d11;
+
+  --color-slate-50: #f7f4ef;
+  --color-slate-100: #efeae3;
+  --color-slate-200: #e2dbd1;
+  --color-slate-300: #c9beb2;
+  --color-slate-400: #a39486;
+  --color-slate-500: #786b61;
+  --color-slate-600: #62564f;
+  --color-slate-700: #4c423c;
+  --color-slate-800: #362e2a;
+  --color-slate-900: #251f1c;
+  --color-slate-950: #191512;
+
+  --color-sidebar: #2c1b25;
+  --color-sidebar-text: #e1d3d5;
+  --color-sidebar-muted: #bca5ac;
+  --color-sidebar-hover: #442634;
+  --color-sidebar-active: #f0c988;
+  --color-sidebar-line: #52343f;
+}
+
 @layer base {
   body {
     @apply bg-slate-50 text-slate-800 antialiased font-sans m-0 p-0;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1 {
+    font-family: var(--font-display);
+  }
+
+  ::selection {
+    color: #43202c;
+    background: #e9d498;
   }
 
   /* Custom subtle scrollbars for compact business tables */
@@ -20,6 +100,13 @@
   }
   ::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
+  }
+}
+
+@layer components {
+  .storefront-theme h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
   }
 }
 

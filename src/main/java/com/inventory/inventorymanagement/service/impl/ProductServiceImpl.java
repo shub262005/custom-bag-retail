@@ -43,10 +43,16 @@ public class ProductServiceImpl implements ProductService {
         if (productRepository.existsBySkuIgnoreCase(trimmedSku)) {
             throw new DuplicateResourceException("Product with SKU '" + trimmedSku + "' already exists");
         }
+        if (productRepository.existsByBarcodeIgnoreCase(trimmedSku)) {
+            throw new DuplicateResourceException("SKU '" + trimmedSku + "' is already used as another product's barcode");
+        }
 
         String trimmedBarcode = sanitizeBarcode(request.getBarcode());
         if (trimmedBarcode != null && productRepository.existsByBarcodeIgnoreCase(trimmedBarcode)) {
             throw new DuplicateResourceException("Product with barcode '" + trimmedBarcode + "' already exists");
+        }
+        if (trimmedBarcode != null && productRepository.existsBySkuIgnoreCase(trimmedBarcode)) {
+            throw new DuplicateResourceException("Barcode '" + trimmedBarcode + "' is already used as another product's SKU");
         }
 
         Category category = categoryRepository.findById(request.getCategoryId())
@@ -116,10 +122,16 @@ public class ProductServiceImpl implements ProductService {
         if (productRepository.existsBySkuIgnoreCaseAndIdNot(trimmedSku, id)) {
             throw new DuplicateResourceException("Product with SKU '" + trimmedSku + "' already exists");
         }
+        if (productRepository.existsByBarcodeIgnoreCaseAndIdNot(trimmedSku, id)) {
+            throw new DuplicateResourceException("SKU '" + trimmedSku + "' is already used as another product's barcode");
+        }
 
         String trimmedBarcode = sanitizeBarcode(request.getBarcode());
         if (trimmedBarcode != null && productRepository.existsByBarcodeIgnoreCaseAndIdNot(trimmedBarcode, id)) {
             throw new DuplicateResourceException("Product with barcode '" + trimmedBarcode + "' already exists");
+        }
+        if (trimmedBarcode != null && productRepository.existsBySkuIgnoreCaseAndIdNot(trimmedBarcode, id)) {
+            throw new DuplicateResourceException("Barcode '" + trimmedBarcode + "' is already used as another product's SKU");
         }
 
         Category category = categoryRepository.findById(request.getCategoryId())

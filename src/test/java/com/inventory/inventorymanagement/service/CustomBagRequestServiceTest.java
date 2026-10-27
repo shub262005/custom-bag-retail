@@ -77,6 +77,32 @@ class CustomBagRequestServiceTest {
         verifyNoInteractions(requests);
     }
 
+    @Test void newModelsAreSavedWithTheirFeaturesAndServerPrice() {
+        for (CustomBagType type : new CustomBagType[]{CustomBagType.TOTE_BAG, CustomBagType.SLING_BAG}) {
+            var r = CustomBagPricingServiceTest.request(type);
+            r.setCompartmentCount(2); r.setFrontPocket(true); r.setWaterResistant(true);
+            var response = service.create(r, null);
+            assertEquals(type, response.bagType());
+            assertEquals(2, response.compartmentCount());
+            assertTrue(response.frontPocket());
+            assertTrue(response.waterResistant());
+            assertEquals(type == CustomBagType.TOTE_BAG ? "1250.00" : "1350.00", response.estimatedPrice().toPlainString());
+        }
+    }
+
+    @Test void newModelsRejectUnsupportedOptionsBeforeSaving() {
+        for (CustomBagType type : new CustomBagType[]{CustomBagType.TOTE_BAG, CustomBagType.SLING_BAG}) {
+            var r = CustomBagPricingServiceTest.request(type);
+            r.setCompartmentCount(3);
+            assertThrows(IllegalArgumentException.class, () -> service.create(r, null));
+            r.setCompartmentCount(1); r.setSidePockets(true);
+            assertThrows(IllegalArgumentException.class, () -> service.create(r, null));
+            r.setSidePockets(false); r.setLaptopPadding(true);
+            assertThrows(IllegalArgumentException.class, () -> service.create(r, null));
+        }
+        verifyNoInteractions(requests);
+    }
+
     @Test void ownershipCannotBeSelectedByRequestPayload() {
         assertThrows(NoSuchFieldException.class,
                 () -> CustomBagRequestCreateRequest.class.getDeclaredField("customerUserId"));

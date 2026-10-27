@@ -4,6 +4,7 @@ import com.inventory.inventorymanagement.entity.Product;
 import com.inventory.inventorymanagement.entity.ProductStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -25,6 +26,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     boolean existsByBarcodeIgnoreCaseAndIdNot(String barcode, Long id);
 
+    @Override
+    @EntityGraph(attributePaths = {"category", "brand"})
+    List<Product> findAll();
+
+    @EntityGraph(attributePaths = {"category", "brand"})
     List<Product> findByStatus(ProductStatus status);
 
     @Query("SELECT p FROM Product p " +

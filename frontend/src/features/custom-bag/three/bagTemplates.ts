@@ -64,6 +64,30 @@ export const BAG_TEMPLATES: Record<BagType, BagTemplateDefinition> = {
     supportedBrandingPositions: ALL_BRANDING_POSITIONS,
     defaults: { frontPocket: true, sidePockets: true, laptopPadding: false, compartmentCount: 2 },
   },
+  TOTE_BAG: {
+    id: 'TOTE_BAG',
+    label: 'Everyday Tote',
+    shortLabel: 'Tote',
+    basePrice: 900,
+    supportsFrontPocket: true,
+    supportsSidePockets: false,
+    supportsLaptopPadding: false,
+    supportedCompartments: [1, 2],
+    supportedBrandingPositions: ALL_BRANDING_POSITIONS,
+    defaults: { frontPocket: true, sidePockets: false, laptopPadding: false, compartmentCount: 1 },
+  },
+  SLING_BAG: {
+    id: 'SLING_BAG',
+    label: 'Crossbody Sling',
+    shortLabel: 'Sling',
+    basePrice: 1000,
+    supportsFrontPocket: true,
+    supportsSidePockets: false,
+    supportsLaptopPadding: false,
+    supportedCompartments: [1, 2],
+    supportedBrandingPositions: ALL_BRANDING_POSITIONS,
+    defaults: { frontPocket: true, sidePockets: false, laptopPadding: false, compartmentCount: 1 },
+  },
 }
 
 export function normalizeConfigurationForTemplate(

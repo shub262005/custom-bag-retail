@@ -6,6 +6,8 @@ import {
   Briefcase,
   Check,
   Luggage,
+  ShoppingBag,
+  MoveUpRight,
   RotateCcw,
   Trash2,
   Upload,
@@ -51,6 +53,8 @@ const BAG_MODEL_OPTIONS: { value: BagType; label: string; icon: LucideIcon }[] =
   { value: 'BACKPACK', label: 'Classic Backpack', icon: Backpack },
   { value: 'LAPTOP_BAG', label: 'Laptop Bag', icon: Briefcase },
   { value: 'DUFFEL_BAG', label: 'Duffel Bag', icon: Luggage },
+  { value: 'TOTE_BAG', label: 'Everyday Tote', icon: ShoppingBag },
+  { value: 'SLING_BAG', label: 'Crossbody Sling', icon: MoveUpRight },
 ]
 const BRANDING_POSITIONS: { value: BrandingPosition; label: string }[] = [
   { value: 'UPPER_FRONT', label: 'Upper Front' },
@@ -362,7 +366,7 @@ export function CustomBagDesigner() {
           <div className="border-t border-slate-100 pt-5">
             <SectionHeading>Size</SectionHeading>
             <fieldset>
-              <legend className="mb-2 text-xs font-semibold text-slate-700">Backpack Size</legend>
+              <legend className="mb-2 text-xs font-semibold text-slate-700">Bag Size</legend>
               <div className="grid grid-cols-3 gap-2">
                 {SIZES.map((size) => (
                   <button

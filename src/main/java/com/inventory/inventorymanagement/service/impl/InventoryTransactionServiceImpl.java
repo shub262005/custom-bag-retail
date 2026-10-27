@@ -10,6 +10,7 @@ import com.inventory.inventorymanagement.exception.ResourceNotFoundException;
 import com.inventory.inventorymanagement.repository.InventoryTransactionRepository;
 import com.inventory.inventorymanagement.repository.ProductRepository;
 import com.inventory.inventorymanagement.service.InventoryTransactionService;
+import com.inventory.inventorymanagement.service.QuantityMath;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,7 +52,7 @@ public class InventoryTransactionServiceImpl implements InventoryTransactionServ
                 throw new IllegalArgumentException("STOCK_IN quantity must be greater than 0");
             }
             recordedQuantity = reqQty;
-            quantityAfter = quantityBefore + recordedQuantity;
+            quantityAfter = QuantityMath.add(quantityBefore, recordedQuantity);
         } else if (type == TransactionType.STOCK_OUT) {
             if (reqQty == null || reqQty <= 0) {
                 throw new IllegalArgumentException("STOCK_OUT quantity must be greater than 0");

@@ -149,6 +149,7 @@ public class CustomBagRequestServiceImpl implements CustomBagRequestService {
         Set<Integer> compartments = switch (r.getBagType()) {
             case BACKPACK, DUFFEL_BAG -> Set.of(1, 2, 3, 4);
             case LAPTOP_BAG -> Set.of(1, 2, 3);
+            case TOTE_BAG, SLING_BAG -> Set.of(1, 2);
         };
         if (!compartments.contains(r.getCompartmentCount()))
             throw new IllegalArgumentException("Selected compartment count is not supported by this bag type");
@@ -156,6 +157,9 @@ public class CustomBagRequestServiceImpl implements CustomBagRequestService {
             throw new IllegalArgumentException("Laptop Bag does not support side pockets");
         if (r.getBagType() == CustomBagType.DUFFEL_BAG && r.isLaptopPadding())
             throw new IllegalArgumentException("Duffel Bag does not support laptop padding");
+        if ((r.getBagType() == CustomBagType.TOTE_BAG || r.getBagType() == CustomBagType.SLING_BAG)
+                && (r.isSidePockets() || r.isLaptopPadding()))
+            throw new IllegalArgumentException("Tote and Sling bags do not support side pockets or laptop padding");
         if (hasLogo && r.getLogoPosition() == null) throw new IllegalArgumentException("Logo position is required when a logo is uploaded");
         if (trimToNull(r.getCustomText()) != null && (r.getTextColor() == null || r.getTextPosition() == null))
             throw new IllegalArgumentException("Text color and position are required with custom text");

@@ -6,7 +6,7 @@ import { storefrontConfig } from '../../config/storefrontConfig'
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
   `rounded-full px-3.5 py-2 text-sm font-semibold transition-all duration-300 ${
-    isActive ? 'bg-rose-100 text-red-700 shadow-sm' : 'text-slate-600 hover:-translate-y-0.5 hover:bg-rose-50 hover:text-red-700'
+    isActive ? 'bg-rose-100 text-brand-700 shadow-sm' : 'text-slate-600 hover:-translate-y-0.5 hover:bg-rose-50 hover:text-brand-700'
   }`
 
 export function CustomerLayout() {
@@ -26,7 +26,7 @@ export function CustomerLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-rose-50/30 text-slate-900">
+    <div className="storefront-theme min-h-screen bg-slate-50 text-slate-900">
       <header className="sticky top-0 z-40 border-b border-rose-200/80 bg-white/92 shadow-[0_4px_24px_rgba(190,18,60,0.06)] backdrop-blur-md">
         <div className="mx-auto flex h-18 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
           <Link to="/home" className="flex min-w-0 items-center gap-3" onClick={closeMenu}>
@@ -37,7 +37,7 @@ export function CustomerLayout() {
               <span className="block truncate text-sm font-extrabold tracking-tight text-slate-950 sm:text-base">
                 {storefrontConfig.storeName}
               </span>
-              <span className="block text-[11px] font-bold uppercase tracking-[0.16em] text-orange-600">
+              <span className="block text-[11px] font-bold uppercase tracking-[0.16em] text-accent-600">
                 {storefrontConfig.establishedText}
               </span>
             </span>
@@ -53,7 +53,7 @@ export function CustomerLayout() {
             {user ? (
               <>
                 {!isCustomer && (
-                  <Link to="/dashboard" className="rounded-lg px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-rose-50">
+                  <Link to="/dashboard" className="rounded-lg px-3 py-2 text-sm font-semibold text-brand-700 transition hover:bg-rose-50">
                     Staff dashboard
                   </Link>
                 )}
@@ -68,7 +68,7 @@ export function CustomerLayout() {
             ) : (
               <>
                 <Link to="/login" className="rounded-lg px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Log in</Link>
-                <Link to="/register" className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-red-200 transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-lg">Create account</Link>
+                <Link to="/register" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-brand-200 transition-all duration-300 hover:-translate-y-0.5 hover:bg-brand-700 hover:shadow-lg">Create account</Link>
               </>
             )}
           </div>
@@ -93,7 +93,7 @@ export function CustomerLayout() {
                 ) : (
                   <>
                     <Link to="/login" onClick={closeMenu} className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-center text-sm font-semibold">Log in</Link>
-                    <Link to="/register" onClick={closeMenu} className="flex-1 rounded-lg bg-red-600 px-3 py-2 text-center text-sm font-semibold text-white">Register</Link>
+                    <Link to="/register" onClick={closeMenu} className="flex-1 rounded-lg bg-brand-600 px-3 py-2 text-center text-sm font-semibold text-white">Register</Link>
                   </>
                 )}
               </div>
