@@ -31,6 +31,27 @@ public class SaleServiceImpl implements SaleService {
     private final InventoryTransactionRepository inventoryTransactionRepository;
     private final SaleNumberGenerator saleNumberGenerator;
     private final CurrentUserService currentUserService;
+    private final com.inventory.inventorymanagement.service.CustomerService customerService;
+
+    public SaleServiceImpl(SaleRepository saleRepository,
+                           SaleItemRepository saleItemRepository,
+                           SalePaymentRepository salePaymentRepository,
+                           SaleAuditHistoryRepository saleAuditHistoryRepository,
+                           ProductRepository productRepository,
+                           InventoryTransactionRepository inventoryTransactionRepository,
+                           SaleNumberGenerator saleNumberGenerator,
+                           CurrentUserService currentUserService,
+                           com.inventory.inventorymanagement.service.CustomerService customerService) {
+        this.saleRepository = saleRepository;
+        this.saleItemRepository = saleItemRepository;
+        this.salePaymentRepository = salePaymentRepository;
+        this.saleAuditHistoryRepository = saleAuditHistoryRepository;
+        this.productRepository = productRepository;
+        this.inventoryTransactionRepository = inventoryTransactionRepository;
+        this.saleNumberGenerator = saleNumberGenerator;
+        this.currentUserService = currentUserService;
+        this.customerService = customerService;
+    }
 
     public SaleServiceImpl(SaleRepository saleRepository,
                            SaleItemRepository saleItemRepository,
@@ -40,14 +61,8 @@ public class SaleServiceImpl implements SaleService {
                            InventoryTransactionRepository inventoryTransactionRepository,
                            SaleNumberGenerator saleNumberGenerator,
                            CurrentUserService currentUserService) {
-        this.saleRepository = saleRepository;
-        this.saleItemRepository = saleItemRepository;
-        this.salePaymentRepository = salePaymentRepository;
-        this.saleAuditHistoryRepository = saleAuditHistoryRepository;
-        this.productRepository = productRepository;
-        this.inventoryTransactionRepository = inventoryTransactionRepository;
-        this.saleNumberGenerator = saleNumberGenerator;
-        this.currentUserService = currentUserService;
+        this(saleRepository, saleItemRepository, salePaymentRepository, saleAuditHistoryRepository,
+             productRepository, inventoryTransactionRepository, saleNumberGenerator, currentUserService, null);
     }
 
     @Override
@@ -98,10 +113,61 @@ public class SaleServiceImpl implements SaleService {
             grandTotal = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
         }
 
-        if (grandTotal.compareTo(BigDecimal.ZERO) > 0) {
-            if (request.getPaymentMethod() == null) {
-                throw new IllegalArgumentException("Payment method is required for sale total of " + grandTotal);
+        boolean isDue = Boolean.TRUE.equals(request.getIsDueSale()) ||
+                (request.getPaidAmount() != null && request.getPaidAmount().compareTo(grandTotal) < 0);
+
+        Customer customer = null;
+        if (customerService != null) {
+            customer = customerService.getOrCreateCustomer(
+                    request.getCustomerId(),
+                    request.getCustomerName(),
+                    request.getCustomerPhone(),
+                    request.getCustomerEmail(),
+                    request.getCustomerAddress()
+            );
+        }
+
+        BigDecimal paidAmount;
+        BigDecimal dueAmount;
+        PaymentStatus paymentStatus;
+
+        if (isDue) {
+            if (customer == null) {
+                throw new IllegalArgumentException("Customer name and phone number are required for due/credit sales");
             }
+            paidAmount = request.getPaidAmount() != null
+                    ? request.getPaidAmount().setScale(2, RoundingMode.HALF_UP)
+                    : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+
+            if (paidAmount.compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException("Initial paid amount cannot be negative");
+            }
+            if (paidAmount.compareTo(grandTotal) > 0) {
+                throw new IllegalArgumentException("Paid amount cannot exceed grand total of ₹" + grandTotal);
+            }
+
+            dueAmount = grandTotal.subtract(paidAmount).setScale(2, RoundingMode.HALF_UP);
+
+            if (paidAmount.compareTo(BigDecimal.ZERO) > 0 && request.getPaymentMethod() == null) {
+                throw new IllegalArgumentException("Payment method is required for initial paid amount of ₹" + paidAmount);
+            }
+
+            if (dueAmount.compareTo(BigDecimal.ZERO) == 0) {
+                paymentStatus = PaymentStatus.PAID;
+            } else if (paidAmount.compareTo(BigDecimal.ZERO) == 0) {
+                paymentStatus = PaymentStatus.UNPAID;
+            } else {
+                paymentStatus = PaymentStatus.PARTIALLY_PAID;
+            }
+        } else {
+            if (grandTotal.compareTo(BigDecimal.ZERO) > 0) {
+                if (request.getPaymentMethod() == null) {
+                    throw new IllegalArgumentException("Payment method is required for sale total of " + grandTotal);
+                }
+            }
+            paidAmount = grandTotal;
+            dueAmount = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+            paymentStatus = PaymentStatus.PAID;
         }
 
         String saleNumber = saleNumberGenerator.generateSaleNumber(saleDate);
@@ -114,6 +180,10 @@ public class SaleServiceImpl implements SaleService {
         sale.setDiscountAmount(discountAmount);
         sale.setGrandTotal(grandTotal);
         sale.setStatus(SaleStatus.COMPLETED);
+        sale.setCustomer(customer);
+        sale.setPaidAmount(paidAmount);
+        sale.setDueAmount(dueAmount);
+        sale.setPaymentStatus(paymentStatus);
 
         for (SaleItemRequest itemReq : mergedItems) {
             Product product = productMap.get(itemReq.getProductId());
@@ -124,9 +194,11 @@ public class SaleServiceImpl implements SaleService {
         }
 
         SalePayment payment = new SalePayment(
-                grandTotal,
-                grandTotal.compareTo(BigDecimal.ZERO) > 0 ? request.getPaymentMethod() : null,
-                request.getPaymentDescription() != null ? request.getPaymentDescription().trim() : null
+                paidAmount,
+                paidAmount.compareTo(BigDecimal.ZERO) > 0 ? request.getPaymentMethod() : null,
+                request.getPaymentDescription() != null
+                        ? request.getPaymentDescription().trim()
+                        : (isDue ? (paidAmount.compareTo(BigDecimal.ZERO) == 0 ? "Due sale - uncollected" : "Partial down payment") : null)
         );
         sale.setPayment(payment);
 
@@ -616,6 +688,15 @@ public class SaleServiceImpl implements SaleService {
                 paymentMethodMetrics,
                 topProducts
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SaleResponse> getDueSales(String query, Boolean onlyPending) {
+        String trimmed = query != null ? query.trim() : null;
+        boolean pending = onlyPending != null ? onlyPending : true;
+        List<Sale> sales = saleRepository.findDueSales(trimmed, pending);
+        return sales.stream().map(SaleResponse::fromEntity).toList();
     }
 
     private List<SaleItemRequest> validateAndMergeItems(List<SaleItemRequest> items) {

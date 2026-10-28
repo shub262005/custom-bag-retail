@@ -56,6 +56,20 @@ public class Sale {
     @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
+    @Column(name = "paid_amount", nullable = false, precision = 12, scale = 2)
+    private BigDecimal paidAmount = BigDecimal.ZERO;
+
+    @Column(name = "due_amount", nullable = false, precision = 12, scale = 2)
+    private BigDecimal dueAmount = BigDecimal.ZERO;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", nullable = false, length = 20)
+    private PaymentStatus paymentStatus = PaymentStatus.PAID;
+
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @BatchSize(size = 50)
     private List<SaleItem> items = new ArrayList<>();
@@ -188,6 +202,38 @@ public class Sale {
 
     public void setCancelledAt(LocalDateTime cancelledAt) {
         this.cancelledAt = cancelledAt;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public BigDecimal getPaidAmount() {
+        return paidAmount;
+    }
+
+    public void setPaidAmount(BigDecimal paidAmount) {
+        this.paidAmount = paidAmount != null ? paidAmount : BigDecimal.ZERO;
+    }
+
+    public BigDecimal getDueAmount() {
+        return dueAmount;
+    }
+
+    public void setDueAmount(BigDecimal dueAmount) {
+        this.dueAmount = dueAmount != null ? dueAmount : BigDecimal.ZERO;
+    }
+
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus != null ? paymentStatus : PaymentStatus.PAID;
     }
 
     public List<SaleItem> getItems() {

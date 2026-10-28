@@ -1,4 +1,5 @@
-import type { CancellationReason, PaymentMethod, SaleAuditAction, SaleStatus } from './common.types'
+import type { CancellationReason, PaymentMethod, PaymentStatus, SaleAuditAction, SaleStatus } from './common.types'
+import type { CustomerResponse } from './customer.types'
 
 export interface SaleItemResponse {
   id: number
@@ -49,6 +50,10 @@ export interface SaleResponse {
   cancelledAt?: string | null
   items: SaleItemResponse[]
   payment?: SalePaymentResponse | null
+  customer?: CustomerResponse | null
+  paidAmount?: number
+  dueAmount?: number
+  paymentStatus?: PaymentStatus
   createdAt: string
   updatedAt: string
 }
@@ -60,6 +65,13 @@ export interface SaleRequest {
   discountAmount?: number
   paymentMethod?: PaymentMethod
   paymentDescription?: string
+  customerId?: number
+  customerName?: string
+  customerPhone?: string
+  customerEmail?: string
+  customerAddress?: string
+  isDueSale?: boolean
+  paidAmount?: number
 }
 
 export interface SaleEditRequest {

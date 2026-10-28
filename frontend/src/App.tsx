@@ -24,6 +24,9 @@ import { PosPage } from './pages/PosPage'
 import { SalesPage } from './pages/SalesPage'
 import { SaleDetailPage } from './pages/SaleDetailPage'
 import { SaleEditPage } from './pages/SaleEditPage'
+import { DuePaymentsPage } from './features/sales/DuePaymentsPage'
+import { CustomerListPage } from './features/customers/CustomerListPage'
+import { CustomerDetailPage } from './features/customers/CustomerDetailPage'
 import { ReportsPage } from './pages/ReportsPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { LoginPage } from './pages/LoginPage'
@@ -100,8 +103,11 @@ export const App: React.FC = () => {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/sales/pos" element={<PosPage />} />
               <Route path="/sales" element={<SalesPage />} />
+              <Route path="/sales/due-payments" element={<DuePaymentsPage />} />
               <Route path="/sales/:id" element={<SaleDetailPage />} />
               <Route path="/sales/:id/edit" element={<SaleEditPage />} />
+              <Route path="/customers" element={<CustomerListPage />} />
+              <Route path="/customers/:id" element={<CustomerDetailPage />} />
             </Route>
 
             <Route element={<RoleRoute allowedRoles={ADMIN_ROLES} />}>

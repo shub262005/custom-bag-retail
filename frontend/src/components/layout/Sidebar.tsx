@@ -12,6 +12,8 @@ import {
   ShoppingBag,
   CreditCard,
   History,
+  Clock,
+  Users,
   BarChart3,
   Palette,
   ClipboardList,
@@ -218,11 +220,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
                     <History className="w-3.5 h-3.5 shrink-0" />
                     <span>Sales History</span>
                   </NavLink>
+                  <NavLink to="/sales/due-payments" className={subNavItemClass}>
+                    <Clock className="w-3.5 h-3.5 shrink-0" />
+                    <span>Due Payments</span>
+                  </NavLink>
                 </div>
               )}
             </>
           )}
         </div>
+
+        {/* Customers Section */}
+        <NavLink to="/customers" className={navItemClass} title="Customers">
+          <Users className="w-4 h-4 shrink-0" />
+          {!isCollapsed && <span>Customers</span>}
+        </NavLink>
           </>
         )}
 

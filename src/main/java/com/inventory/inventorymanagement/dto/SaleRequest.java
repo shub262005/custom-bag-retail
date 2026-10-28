@@ -29,6 +29,20 @@ public class SaleRequest {
 
     private String paymentDescription;
 
+    private Long customerId;
+
+    private String customerName;
+
+    private String customerPhone;
+
+    private String customerEmail;
+
+    private String customerAddress;
+
+    private Boolean isDueSale;
+
+    private BigDecimal paidAmount;
+
     public SaleRequest() {
     }
 
@@ -89,5 +103,61 @@ public class SaleRequest {
 
     public void setPaymentDescription(String paymentDescription) {
         this.paymentDescription = paymentDescription;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getCustomerPhone() {
+        return customerPhone;
+    }
+
+    public void setCustomerPhone(String customerPhone) {
+        this.customerPhone = customerPhone;
+    }
+
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
+    }
+
+    public String getCustomerAddress() {
+        return customerAddress;
+    }
+
+    public void setCustomerAddress(String customerAddress) {
+        this.customerAddress = customerAddress;
+    }
+
+    public Boolean getIsDueSale() {
+        return isDueSale;
+    }
+
+    public void setIsDueSale(Boolean isDueSale) {
+        this.isDueSale = isDueSale;
+    }
+
+    public BigDecimal getPaidAmount() {
+        return paidAmount;
+    }
+
+    public void setPaidAmount(BigDecimal paidAmount) {
+        this.paidAmount = paidAmount;
     }
 }

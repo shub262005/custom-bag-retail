@@ -26,6 +26,10 @@ public class SaleResponse {
     private LocalDateTime cancelledAt;
     private List<SaleItemResponse> items = new ArrayList<>();
     private SalePaymentResponse payment;
+    private CustomerResponse customer;
+    private BigDecimal paidAmount = BigDecimal.ZERO;
+    private BigDecimal dueAmount = BigDecimal.ZERO;
+    private com.inventory.inventorymanagement.entity.PaymentStatus paymentStatus = com.inventory.inventorymanagement.entity.PaymentStatus.PAID;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -69,7 +73,7 @@ public class SaleResponse {
                 ? SalePaymentResponse.fromEntity(sale.getPayment())
                 : null;
 
-        return new SaleResponse(
+        SaleResponse response = new SaleResponse(
                 sale.getId(),
                 sale.getSaleNumber(),
                 sale.getSaleDate(),
@@ -87,6 +91,45 @@ public class SaleResponse {
                 sale.getCreatedAt(),
                 sale.getUpdatedAt()
         );
+        if (sale.getCustomer() != null) {
+            response.setCustomer(CustomerResponse.fromEntity(sale.getCustomer()));
+        }
+        response.setPaidAmount(sale.getPaidAmount() != null ? sale.getPaidAmount() : BigDecimal.ZERO);
+        response.setDueAmount(sale.getDueAmount() != null ? sale.getDueAmount() : BigDecimal.ZERO);
+        response.setPaymentStatus(sale.getPaymentStatus() != null ? sale.getPaymentStatus() : com.inventory.inventorymanagement.entity.PaymentStatus.PAID);
+        return response;
+    }
+
+    public CustomerResponse getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(CustomerResponse customer) {
+        this.customer = customer;
+    }
+
+    public BigDecimal getPaidAmount() {
+        return paidAmount;
+    }
+
+    public void setPaidAmount(BigDecimal paidAmount) {
+        this.paidAmount = paidAmount;
+    }
+
+    public BigDecimal getDueAmount() {
+        return dueAmount;
+    }
+
+    public void setDueAmount(BigDecimal dueAmount) {
+        this.dueAmount = dueAmount;
+    }
+
+    public com.inventory.inventorymanagement.entity.PaymentStatus getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(com.inventory.inventorymanagement.entity.PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 
     public Long getId() {

@@ -134,4 +134,12 @@ public class SaleController {
         SalesDashboardResponse response = saleService.getSalesDashboard(date);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/due-payments")
+    public ResponseEntity<List<SaleResponse>> getDueSales(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false, defaultValue = "true") Boolean onlyPending) {
+        List<SaleResponse> response = saleService.getDueSales(search, onlyPending);
+        return ResponseEntity.ok(response);
+    }
 }

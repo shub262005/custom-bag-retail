@@ -75,6 +75,7 @@ export interface PurchaseRequest {
 export interface PurchaseFilterParams {
   supplierId?: number
   status?: PurchaseStatus
+  paymentStatus?: PaymentStatus
   startDate?: string
   endDate?: string
   search?: string

@@ -43,4 +43,6 @@ public interface SaleService {
     List<CancelledSalesReportResponse> getCancelledSalesReport(LocalDate startDate, LocalDate endDate);
 
     SalesDashboardResponse getSalesDashboard(LocalDate date);
+
+    List<SaleResponse> getDueSales(String query, Boolean onlyPending);
 }

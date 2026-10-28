@@ -86,4 +86,31 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
            "ORDER BY s.saleDate DESC, s.id DESC")
     List<Sale> findCancelledSales(@Param("startDate") LocalDate startDate,
                                   @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT DISTINCT s FROM Sale s " +
+           "LEFT JOIN FETCH s.customer c " +
+           "LEFT JOIN FETCH s.payment p " +
+           "WHERE s.status = com.inventory.inventorymanagement.entity.SaleStatus.COMPLETED " +
+           "  AND s.customer IS NOT NULL " +
+           "  AND (:onlyPending IS FALSE OR s.dueAmount > 0) " +
+           "  AND (CAST(:query AS string) IS NULL OR (" +
+           "       LOWER(s.saleNumber) LIKE LOWER(CONCAT('%', CAST(:query AS string), '%')) OR " +
+           "       LOWER(c.name) LIKE LOWER(CONCAT('%', CAST(:query AS string), '%')) OR " +
+           "       c.phone LIKE CONCAT('%', CAST(:query AS string), '%')" +
+           "  )) " +
+           "ORDER BY s.saleDate DESC, s.id DESC")
+    List<Sale> findDueSales(@Param("query") String query, @Param("onlyPending") Boolean onlyPending);
+
+    @Query("SELECT s FROM Sale s " +
+           "LEFT JOIN FETCH s.payment p " +
+           "WHERE s.customer.id = :customerId " +
+           "ORDER BY s.saleDate DESC, s.id DESC")
+    List<Sale> findByCustomerId(@Param("customerId") Long customerId);
+
+    @Query("SELECT COUNT(s), COALESCE(SUM(s.grandTotal), 0), COALESCE(SUM(s.paidAmount), 0), COALESCE(SUM(s.dueAmount), 0) " +
+           "FROM Sale s WHERE s.customer.id = :customerId AND s.status = com.inventory.inventorymanagement.entity.SaleStatus.COMPLETED")
+    List<Object[]> getCustomerSalesStats(@Param("customerId") Long customerId);
+
+    @Query("SELECT COALESCE(SUM(s.dueAmount), 0) FROM Sale s WHERE s.status = com.inventory.inventorymanagement.entity.SaleStatus.COMPLETED")
+    BigDecimal getTotalOutstandingDue();
 }

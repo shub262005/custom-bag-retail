@@ -20,7 +20,7 @@ import { useSuppliers } from '../suppliers/useSuppliers'
 import { useDebounce } from '../../hooks/useDebounce'
 import { formatINR, formatDate } from '../../utils/formatters'
 import { getErrorMessage } from '../../api/errorParser'
-import type { PurchaseFilterParams, PurchaseStatus } from '../../types'
+import type { PaymentStatus, PurchaseFilterParams, PurchaseStatus } from '../../types'
 import {
   Plus,
   Search,
@@ -37,6 +37,7 @@ export const PurchaseListPage: React.FC = () => {
   const debouncedSearch = useDebounce(searchInput, 300)
   const [selectedSupplierId, setSelectedSupplierId] = useState<string>('')
   const [selectedStatus, setSelectedStatus] = useState<string>('')
+  const [selectedPaymentStatus, setSelectedPaymentStatus] = useState<PaymentStatus | ''>('')
   const [startDate, setStartDate] = useState<string>('')
   const [endDate, setEndDate] = useState<string>('')
 
@@ -59,13 +60,21 @@ export const PurchaseListPage: React.FC = () => {
   // Query purchases list from backend
   const { data: purchases = [], isLoading, isError, error, refetch } = usePurchases(queryFilters)
 
+  // Filter purchases by payment status (PAID, PARTIALLY_PAID, UNPAID)
+  const filteredPurchases = useMemo(() => {
+    if (!selectedPaymentStatus) {
+      return purchases
+    }
+    return purchases.filter((p) => p.paymentStatus === selectedPaymentStatus)
+  }, [purchases, selectedPaymentStatus])
+
   // Query suppliers for the supplier filter dropdown
   const { suppliersQuery } = useSuppliers()
   const suppliers = suppliersQuery.data || []
 
   // Check if any filter is active
   const hasActiveFilters = Boolean(
-    searchInput || selectedSupplierId || selectedStatus || startDate || endDate
+    searchInput || selectedSupplierId || selectedStatus || selectedPaymentStatus || startDate || endDate
   )
 
   // Reset all filters to default
@@ -73,19 +82,20 @@ export const PurchaseListPage: React.FC = () => {
     setSearchInput('')
     setSelectedSupplierId('')
     setSelectedStatus('')
+    setSelectedPaymentStatus('')
     setStartDate('')
     setEndDate('')
     setCurrentPage(1)
   }
 
-  // Client-side pagination calculations over retrieved purchases
-  const totalItems = purchases.length
+  // Client-side pagination calculations over filtered purchases
+  const totalItems = filteredPurchases.length
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize))
 
   const paginatedPurchases = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize
-    return purchases.slice(startIndex, startIndex + pageSize)
-  }, [purchases, currentPage, pageSize])
+    return filteredPurchases.slice(startIndex, startIndex + pageSize)
+  }, [filteredPurchases, currentPage, pageSize])
 
   // Helper function to map payment status badge
   const renderPaymentBadge = (status: string) => {
@@ -130,7 +140,7 @@ export const PurchaseListPage: React.FC = () => {
 
       {/* Filter Controls Row */}
       <div className="p-3.5 bg-white border border-slate-200 rounded-lg shadow-2xs space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 items-end">
           {/* Search Input */}
           <div className="flex flex-col gap-1 text-left lg:col-span-2">
             <label htmlFor="purchase-search" className="block text-xs font-semibold text-slate-700">
@@ -172,6 +182,27 @@ export const PurchaseListPage: React.FC = () => {
                   {s.name}
                 </option>
               ))}
+            </select>
+          </div>
+
+          {/* Payment Status Dropdown */}
+          <div className="flex flex-col gap-1 text-left">
+            <label htmlFor="payment-status-filter" className="block text-xs font-semibold text-slate-700">
+              Payment Status
+            </label>
+            <select
+              id="payment-status-filter"
+              value={selectedPaymentStatus}
+              onChange={(e) => {
+                setSelectedPaymentStatus(e.target.value as PaymentStatus | '')
+                setCurrentPage(1)
+              }}
+              className="w-full rounded-md border border-slate-300 text-sm text-slate-900 bg-white px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
+            >
+              <option value="">All Payments</option>
+              <option value="PAID">Paid</option>
+              <option value="PARTIALLY_PAID">Partially Paid</option>
+              <option value="UNPAID">Unpaid</option>
             </select>
           </div>
 
@@ -252,12 +283,12 @@ export const PurchaseListPage: React.FC = () => {
           message={getErrorMessage(error)}
           onRetry={refetch}
         />
-      ) : purchases.length === 0 ? (
+      ) : filteredPurchases.length === 0 ? (
         hasActiveFilters ? (
           <EmptyState
             icon={<Filter className="w-6 h-6 text-slate-400" />}
             title="No purchases match your filters."
-            description="Try changing your search keywords, supplier, or date range."
+            description="Try changing your search keywords, supplier, payment status, or date range."
             action={
               <Button size="sm" variant="outline" onClick={handleResetFilters}>
                 Clear Filters

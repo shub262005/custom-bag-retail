@@ -45,3 +45,22 @@ function useSaleMutation<T>(send: (variables: T) => Promise<SaleResponse>) {
 export const useCreateSale = () => useSaleMutation(async (data: SaleRequest) => (await axiosClient.post<SaleResponse>('/sales', data)).data)
 export const useUpdateSale = () => useSaleMutation(async ({ id, data }: { id: number; data: SaleEditRequest }) => (await axiosClient.put<SaleResponse>(`/sales/${id}`, data)).data)
 export const useCancelSale = () => useSaleMutation(async ({ id, data }: { id: number; data: SaleCancelRequest }) => (await axiosClient.patch<SaleResponse>(`/sales/${id}/cancel`, data)).data)
+
+export function useDueSales(params?: { search?: string; onlyPending?: boolean }, options?: { enabled?: boolean }) {
+  const search = params?.search?.trim()
+  const onlyPending = params?.onlyPending ?? true
+
+  return useQuery({
+    queryKey: [...SALES_QUERY_KEY, 'due-payments', { search, onlyPending }],
+    queryFn: async () => {
+      const response = await axiosClient.get<SaleResponse[]>('/sales/due-payments', {
+        params: {
+          search: search || undefined,
+          onlyPending,
+        },
+      })
+      return response.data
+    },
+    enabled: options?.enabled ?? true,
+  })
+}
