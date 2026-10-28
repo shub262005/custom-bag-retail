@@ -8,6 +8,7 @@ import com.inventory.inventorymanagement.service.SaleNumberGenerator;
 import com.inventory.inventorymanagement.service.SaleService;
 import com.inventory.inventorymanagement.service.QuantityMath;
 import com.inventory.inventorymanagement.security.CurrentUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ public class SaleServiceImpl implements SaleService {
     private final CurrentUserService currentUserService;
     private final com.inventory.inventorymanagement.service.CustomerService customerService;
 
+    @Autowired
     public SaleServiceImpl(SaleRepository saleRepository,
                            SaleItemRepository saleItemRepository,
                            SalePaymentRepository salePaymentRepository,
