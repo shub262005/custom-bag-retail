@@ -26,3 +26,4 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
            "ORDER BY c.name ASC")
     List<Customer> findWithFilters(@Param("query") String query, @Param("status") CustomerStatus status);
 }
+

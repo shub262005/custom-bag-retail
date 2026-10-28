@@ -170,3 +170,4 @@ export const RecordRepaymentModal: React.FC<RecordRepaymentModalProps> = ({
     </Modal>
   )
 }
+

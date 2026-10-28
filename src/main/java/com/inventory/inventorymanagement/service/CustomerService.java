@@ -28,3 +28,4 @@ public interface CustomerService {
 
     List<SaleResponse> getCustomerSales(Long customerId);
 }
+

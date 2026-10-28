@@ -22,3 +22,4 @@ public interface CustomerRepaymentRepository extends JpaRepository<CustomerRepay
     @Query("SELECT COALESCE(SUM(r.amount), 0) FROM CustomerRepayment r")
     BigDecimal getTotalRepaidAll();
 }
+

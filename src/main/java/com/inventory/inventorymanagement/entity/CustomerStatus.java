@@ -4,3 +4,4 @@ public enum CustomerStatus {
     ACTIVE,
     INACTIVE
 }
+

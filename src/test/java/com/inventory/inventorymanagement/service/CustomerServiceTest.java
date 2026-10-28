@@ -148,3 +148,4 @@ class CustomerServiceTest {
         assertThrows(IllegalArgumentException.class, () -> customerService.recordRepayment(req));
     }
 }
+

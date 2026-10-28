@@ -78,3 +78,4 @@ CREATE TABLE IF NOT EXISTS customer_repayments (
 CREATE INDEX IF NOT EXISTS idx_repayments_customer_id ON customer_repayments (customer_id);
 CREATE INDEX IF NOT EXISTS idx_repayments_sale_id ON customer_repayments (sale_id);
 CREATE INDEX IF NOT EXISTS idx_repayments_date ON customer_repayments (repayment_date);
+
