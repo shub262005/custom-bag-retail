@@ -36,8 +36,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const currentUser = await authApi.me()
       setUser(currentUser)
       return currentUser
-    } catch {
-      clearSession()
+    } catch (err: unknown) {
+      // Only clear the session for authentication failures (401/403).
+      // Network errors (backend offline / ECONNREFUSED) should NOT wipe the
+      // local session — the user is still "logged in"; the server is just
+      // temporarily unreachable. Clearing the session would also wipe the
+      // entire React Query cache, making every data panel show zeros.
+      const status =
+        err != null &&
+          typeof err === 'object' &&
+          'response' in err &&
+          err.response != null &&
+          typeof err.response === 'object' &&
+          'status' in err.response
+          ? (err.response as { status: number }).status
+          : null
+
+      if (status === 401 || status === 403) {
+        clearSession()
+        return null
+      }
+
+      // Backend unreachable — preserve stored token; ProtectedRoute will
+      // redirect to login. Return null so callers know the user is unresolved.
       return null
     }
   }, [clearSession])
@@ -54,7 +75,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       active = false
     }
-  }, [refreshUser])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Run once on mount only — refreshUser is stable via clearSession dep
 
   useEffect(() => {
     const handleUnauthorized = () => clearSession()

@@ -9,9 +9,17 @@ import { AuthProvider } from './context/AuthContext.tsx'
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 2, // 2 minutes
+      // Retry twice with exponential back-off (1 s → 2 s) before showing an error.
+      // Helps survive brief network hiccups or a slow backend restart.
+      retry: 2,
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+      // Re-fetch when the user returns to the browser tab.
+      // This is the main fix: if the backend restarted while you were away,
+      // the queries heal automatically instead of staying stuck in error state.
+      refetchOnWindowFocus: true,
+      // Keep data "fresh" for 30 seconds; after that it will silently re-fetch
+      // in the background when the component is visible.
+      staleTime: 1000 * 30,
     },
   },
 })
