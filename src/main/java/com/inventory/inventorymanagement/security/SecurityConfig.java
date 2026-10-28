@@ -93,6 +93,8 @@ public class SecurityConfig {
                             .hasAnyRole("ADMIN", "INVENTORY_MANAGER")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/sales/*/cancel")
                             .hasAnyRole("ADMIN", "INVENTORY_MANAGER")
+                        .requestMatchers("/api/v1/customers/**")
+                            .hasAnyRole("ADMIN", "INVENTORY_MANAGER", "CASHIER")
                         .requestMatchers("/api/v1/sales/**")
                             .hasAnyRole("ADMIN", "INVENTORY_MANAGER", "CASHIER")
                         .anyRequest().denyAll())
