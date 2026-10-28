@@ -16,9 +16,10 @@ import { getErrorMessage, getValidationErrors } from '../../api/errorParser'
 import { formatINR } from '../../utils/formatters'
 import type { ProductResponse } from '../../types/product.types'
 import type { SaleResponse } from '../../types/sale.types'
+import type { CustomerResponse } from '../../types/customer.types'
 import type { PaymentMethod } from '../../types/common.types'
 import { useSale, useCreateSale, useUpdateSale, validSaleId } from './useSales'
-import { useCustomers } from '../customers/useCustomers'
+import { CustomerSearchSelect } from '../customers/CustomerSearchSelect'
 import { localToday, paymentOptions, paymentLabel, roundMoney } from './saleForm'
 import { ProductScanner } from '../../components/products/ProductScanner'
 
@@ -60,8 +61,10 @@ function SaleForm({ original }: { original?: SaleResponse }) {
   const [saved, setSaved] = useState<SaleResponse | null>(null)
 
   // Customer & Due Payment State
-  const { data: customerList = [] } = useCustomers()
   const [isDueSale, setIsDueSale] = useState(Boolean(original?.dueAmount && original.dueAmount > 0))
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerResponse | null>(
+    original?.customer ?? null
+  )
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>(
     original?.customer?.id ? String(original.customer.id) : ''
   )
@@ -142,7 +145,7 @@ function SaleForm({ original }: { original?: SaleResponse }) {
       else {
         setSaved(sale); setRows([]); setSearch(''); setDate(localToday());
         setDiscountMode('NONE'); setDiscount('0'); setMethod(''); setDescription(''); setError('');
-        setIsDueSale(false); setSelectedCustomerId(''); setIsNewCustomer(false);
+        setIsDueSale(false); setSelectedCustomerId(''); setSelectedCustomer(null); setIsNewCustomer(false);
         setCustomerName(''); setCustomerPhone(''); setCustomerAddress(''); setPaidNow('0');
       }
     } catch (err) { setError(getErrorMessage(err)); setFields(getValidationErrors(err)); setReview(false); void catalogue.refetch(); void results.refetch() }
@@ -215,36 +218,45 @@ function SaleForm({ original }: { original?: SaleResponse }) {
                 type="button"
                 onClick={() => {
                   setIsNewCustomer(!isNewCustomer)
+                  setSelectedCustomer(null)
                   setSelectedCustomerId('')
                   setCustomerName('')
                   setCustomerPhone('')
                 }}
                 className="text-xs text-blue-600 hover:underline font-medium"
               >
-                {isNewCustomer ? 'Select Existing' : '+ New Customer'}
+                {isNewCustomer ? 'Search Existing' : '+ New Customer'}
               </button>
             </div>
 
             {!isNewCustomer ? (
-              <Select
+              <CustomerSearchSelect
                 label="Customer Account"
-                value={selectedCustomerId}
-                onChange={(e) => {
-                  const custId = e.target.value
-                  setSelectedCustomerId(custId)
-                  const found = customerList.find(c => String(c.id) === custId)
-                  if (found) {
-                    setCustomerName(found.name)
-                    setCustomerPhone(found.phone)
+                required={isDueSale}
+                selectedCustomer={selectedCustomer}
+                onSelect={(cust) => {
+                  setSelectedCustomer(cust)
+                  if (cust) {
+                    setSelectedCustomerId(String(cust.id))
+                    setCustomerName(cust.name)
+                    setCustomerPhone(cust.phone)
+                    setCustomerAddress(cust.address ?? '')
+                  } else {
+                    setSelectedCustomerId('')
+                    setCustomerName('')
+                    setCustomerPhone('')
+                    setCustomerAddress('')
                   }
                 }}
-                options={[
-                  { value: '', label: isDueSale ? '-- Select required customer --' : '-- Walk-in (None) --' },
-                  ...customerList.map(c => ({
-                    value: String(c.id),
-                    label: `${c.name} (${c.phone})${c.totalDueAmount > 0 ? ` [Due: ${formatINR(c.totalDueAmount)}]` : ''}`,
-                  })),
-                ]}
+                onAddNewCustomer={(initialName) => {
+                  setIsNewCustomer(true)
+                  setSelectedCustomer(null)
+                  setSelectedCustomerId('')
+                  if (initialName) {
+                    setCustomerName(initialName)
+                  }
+                }}
+                placeholder="Type name or phone number to search..."
               />
             ) : (
               <div className="space-y-2">
