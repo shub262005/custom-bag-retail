@@ -2,8 +2,7 @@ export { InvoiceModal } from './InvoiceModal'
 export {
   generateSaleInvoicePdf,
   generatePurchaseInvoicePdf,
-  printSaleInvoicePdf,
-  printPurchaseInvoicePdf,
   buildSaleInvoicePdf,
   buildPurchaseInvoicePdf,
+  formatPdfMoney,
 } from './invoicePdfGenerator'

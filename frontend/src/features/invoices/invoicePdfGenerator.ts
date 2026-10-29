@@ -391,66 +391,12 @@ export function buildPurchaseInvoicePdf(purchase: PurchaseResponse): jsPDF {
   return doc
 }
 
-// Directly prints the exact jsPDF document
-export function printPdfDocument(doc: jsPDF) {
-  doc.autoPrint()
-  const blob = doc.output('blob')
-  const blobUrl = URL.createObjectURL(blob)
-
-  const iframe = document.createElement('iframe')
-  iframe.style.position = 'fixed'
-  iframe.style.right = '0'
-  iframe.style.bottom = '0'
-  iframe.style.width = '0'
-  iframe.style.height = '0'
-  iframe.style.border = '0'
-  iframe.src = blobUrl
-
-  document.body.appendChild(iframe)
-
-  const trigger = () => {
-    try {
-      iframe.contentWindow?.focus()
-      iframe.contentWindow?.print()
-    } catch {
-      window.open(blobUrl, '_blank')
-    }
-  }
-
-  iframe.onload = () => {
-    setTimeout(trigger, 350)
-  }
-
-  // Fallback trigger in case iframe onload does not fire
-  setTimeout(trigger, 1200)
-
-  // Cleanup after print dialog interaction
-  setTimeout(() => {
-    try {
-      document.body.removeChild(iframe)
-      URL.revokeObjectURL(blobUrl)
-    } catch {
-      // ignore
-    }
-  }, 90000)
-}
-
 export function generateSaleInvoicePdf(sale: SaleResponse) {
   const doc = buildSaleInvoicePdf(sale)
   doc.save(`Invoice_${sale.saleNumber}.pdf`)
 }
 
-export function printSaleInvoicePdf(sale: SaleResponse) {
-  const doc = buildSaleInvoicePdf(sale)
-  printPdfDocument(doc)
-}
-
 export function generatePurchaseInvoicePdf(purchase: PurchaseResponse) {
   const doc = buildPurchaseInvoicePdf(purchase)
   doc.save(`PO_${purchase.purchaseNumber}.pdf`)
-}
-
-export function printPurchaseInvoicePdf(purchase: PurchaseResponse) {
-  const doc = buildPurchaseInvoicePdf(purchase)
-  printPdfDocument(doc)
 }

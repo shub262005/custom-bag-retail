@@ -8,8 +8,6 @@ import type { PurchaseResponse } from '../../types/purchase.types'
 import {
   generateSaleInvoicePdf,
   generatePurchaseInvoicePdf,
-  printSaleInvoicePdf,
-  printPurchaseInvoicePdf,
   formatPdfMoney,
 } from './invoicePdfGenerator'
 
@@ -31,13 +29,111 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
   const isSale = Boolean(sale)
   const titleNumber = isSale ? sale?.saleNumber : purchase?.purchaseNumber
 
-  // Print button directly outputs the exact same PDF document as the export
+  // Single-fire, clean iframe print that matches the PDF document layout 1:1
   const handlePrint = () => {
-    if (sale) {
-      printSaleInvoicePdf(sale)
-    } else if (purchase) {
-      printPurchaseInvoicePdf(purchase)
+    const el = document.getElementById('printable-invoice-sheet')
+    if (!el) return
+
+    const existing = document.getElementById('print-invoice-iframe')
+    if (existing) existing.remove()
+
+    const iframe = document.createElement('iframe')
+    iframe.id = 'print-invoice-iframe'
+    iframe.style.position = 'fixed'
+    iframe.style.right = '0'
+    iframe.style.bottom = '0'
+    iframe.style.width = '0'
+    iframe.style.height = '0'
+    iframe.style.border = '0'
+    document.body.appendChild(iframe)
+
+    const doc = iframe.contentWindow?.document
+    if (!doc) return
+
+    let styles = ''
+    document.querySelectorAll('style, link[rel="stylesheet"]').forEach((node) => {
+      styles += node.outerHTML
+    })
+
+    const brandBg = isSale ? '#881337' : '#1e293b'
+
+    doc.open()
+    doc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>${titleNumber ? `Invoice_${titleNumber}` : 'Tax Invoice'}</title>
+          ${styles}
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 8mm;
+            }
+            *, *::before, *::after {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+            }
+            body {
+              background-color: #ffffff !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+            }
+            .invoice-brand-header {
+              background-color: ${brandBg} !important;
+              color: #ffffff !important;
+            }
+            .invoice-table-header {
+              background-color: ${brandBg} !important;
+              color: #ffffff !important;
+            }
+            #printable-invoice-sheet {
+              width: 100% !important;
+              max-width: 100% !important;
+              margin: 0 !important;
+              box-shadow: none !important;
+              border: 1px solid #cbd5e1 !important;
+            }
+          </style>
+        </head>
+        <body>
+          <div id="printable-invoice-sheet">
+            ${el.innerHTML}
+          </div>
+        </body>
+      </html>
+    `)
+    doc.close()
+
+    let hasPrinted = false
+    const doPrint = () => {
+      if (hasPrinted) return
+      hasPrinted = true
+      try {
+        iframe.contentWindow?.focus()
+        iframe.contentWindow?.print()
+      } catch (err) {
+        console.error('Print error:', err)
+      } finally {
+        setTimeout(() => {
+          try {
+            iframe.remove()
+          } catch (_) {}
+        }, 1500)
+      }
     }
+
+    iframe.onload = () => {
+      setTimeout(doPrint, 200)
+    }
+
+    setTimeout(() => {
+      if (!hasPrinted) {
+        doPrint()
+      }
+    }, 600)
   }
 
   const handleExportPdf = () => {
@@ -85,7 +181,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
               size="sm"
               leftIcon={<Printer className="w-4 h-4" />}
               onClick={handlePrint}
-              title="Print the exact Invoice PDF document"
+              title="Print Invoice"
               className="bg-[#881337] hover:bg-[#70102e] text-white"
             >
               Print Invoice
@@ -114,13 +210,21 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
         {/* Scrollable Preview Area (Rendered to match the PDF layout exactly) */}
         <div className="p-4 sm:p-8 overflow-y-auto bg-slate-100 flex justify-center">
-          <div className="bg-white shadow-lg border border-slate-300 w-full max-w-[780px] text-slate-800 overflow-hidden font-sans">
-            
-            {/* 1. Header Banner (Solid Brand Maroon / Dark Navy) */}
+          <div
+            id="printable-invoice-sheet"
+            className="bg-white shadow-lg border border-slate-300 w-full max-w-[780px] text-slate-800 overflow-hidden font-sans"
+          >
+            {/* 1. Header Banner (Solid Brand Maroon / Dark Navy matching PDF) */}
             <div
-              className={`p-6 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
+              className={`invoice-brand-header p-6 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
                 isSale ? 'bg-[#881337]' : 'bg-[#1e293b]'
               }`}
+              style={{
+                backgroundColor: isSale ? '#881337' : '#1e293b',
+                color: '#ffffff',
+                WebkitPrintColorAdjust: 'exact',
+                printColorAdjust: 'exact',
+              }}
             >
               <div>
                 <h1 className="text-xl font-black tracking-tight uppercase">
@@ -210,9 +314,15 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
               <table className="w-full text-left text-xs border border-slate-300 border-collapse">
                 <thead>
                   <tr
-                    className={`text-white text-xs font-bold ${
+                    className={`invoice-table-header text-white text-xs font-bold ${
                       isSale ? 'bg-[#881337]' : 'bg-[#1e293b]'
                     }`}
+                    style={{
+                      backgroundColor: isSale ? '#881337' : '#1e293b',
+                      color: '#ffffff',
+                      WebkitPrintColorAdjust: 'exact',
+                      printColorAdjust: 'exact',
+                    }}
                   >
                     <th className="py-2.5 px-3 w-10 text-center border-r border-slate-700/40">#</th>
                     <th className="py-2.5 px-3 border-r border-slate-700/40">Item Description</th>
