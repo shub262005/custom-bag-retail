@@ -27,7 +27,84 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
   const titleNumber = isSale ? sale?.saleNumber : purchase?.purchaseNumber
 
   const handlePrint = () => {
-    window.print()
+    const el = document.getElementById('printable-invoice-container')
+    if (!el) {
+      window.print()
+      return
+    }
+
+    const iframe = document.createElement('iframe')
+    iframe.style.position = 'fixed'
+    iframe.style.right = '0'
+    iframe.style.bottom = '0'
+    iframe.style.width = '0'
+    iframe.style.height = '0'
+    iframe.style.border = '0'
+    document.body.appendChild(iframe)
+
+    const doc = iframe.contentWindow?.document
+    if (!doc) {
+      window.print()
+      return
+    }
+
+    // Capture all stylesheets and fonts from main application
+    let styles = ''
+    document.querySelectorAll('style, link[rel="stylesheet"]').forEach((node) => {
+      styles += node.outerHTML
+    })
+
+    doc.open()
+    doc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>${titleNumber ? `Invoice_${titleNumber}` : 'Tax Invoice'}</title>
+          ${styles}
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 8mm;
+            }
+            body {
+              background: #ffffff !important;
+              margin: 0 !important;
+              padding: 0 !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+            }
+            #printable-invoice-container {
+              max-width: 100% !important;
+              width: 100% !important;
+              box-shadow: none !important;
+              border: none !important;
+              padding: 0 !important;
+              margin: 0 !important;
+            }
+          </style>
+        </head>
+        <body>
+          <div id="printable-invoice-container">
+            ${el.innerHTML}
+          </div>
+        </body>
+      </html>
+    `)
+    doc.close()
+
+    setTimeout(() => {
+      iframe.contentWindow?.focus()
+      iframe.contentWindow?.print()
+      setTimeout(() => {
+        try {
+          document.body.removeChild(iframe)
+        } catch {
+          // ignore
+        }
+      }, 1500)
+    }, 300)
   }
 
   const handleExportPdf = () => {
@@ -40,38 +117,6 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
   return (
     <>
-      {/* Print Specific CSS to isolate the invoice sheet during window.print() */}
-      <style>{`
-        @media print {
-          body * {
-            visibility: hidden !important;
-          }
-          #printable-invoice-container, #printable-invoice-container * {
-            visibility: visible !important;
-          }
-          #printable-invoice-container {
-            position: fixed !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            height: auto !important;
-            margin: 0 !important;
-            padding: 10mm !important;
-            background: #ffffff !important;
-            box-shadow: none !important;
-            border: none !important;
-            z-index: 99999 !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-          @page {
-            size: A4 portrait;
-            margin: 8mm;
-          }
-        }
-      `}</style>
-
       {/* Modal Backdrop & Outer Container */}
       <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 no-print">
         <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-slate-200">
