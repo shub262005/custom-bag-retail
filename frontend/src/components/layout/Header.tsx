@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Plus, AlertCircle, LogOut, UserRound } from 'lucide-react'
+import { Plus, AlertCircle, LogOut, UserRound, Store } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { useAuth } from '../../hooks/useAuth'
 
@@ -54,7 +54,16 @@ export const Header: React.FC<HeaderProps> = ({ isSidebarCollapsed }) => {
       </div>
 
       {/* Right Action Controls */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
+        <Link
+          to="/home"
+          title="Go to Customer Storefront / Home"
+          className="flex items-center gap-1.5 px-2.5 py-1 text-xs text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-md transition-colors"
+        >
+          <Store className="w-3.5 h-3.5 text-slate-600" />
+          <span className="font-medium hidden sm:inline">Storefront</span>
+        </Link>
+
         {isManagement && (
             <Link
               to="/inventory"

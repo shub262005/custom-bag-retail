@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import {
   LayoutDashboard,
+  Store,
   Package,
   Boxes,
   FolderTree,
@@ -57,10 +58,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
         isCollapsed ? 'w-16' : 'w-60'
       }`}
     >
-      {/* Store Branding Header */}
-      <div className="h-14 border-b border-sidebar-line flex items-center px-3.5 justify-between shrink-0">
+      {/* Store Branding Header (Clickable Link to Home) */}
+      <Link
+        to="/home"
+        className="h-14 border-b border-sidebar-line flex items-center px-3.5 justify-between shrink-0 hover:bg-sidebar-hover transition-colors cursor-pointer group"
+        title="Go to Roopam Bag Mall Home Storefront"
+      >
         <div className="flex items-center gap-2.5 overflow-hidden">
-          <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
+          <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs group-hover:scale-105 transition-transform">
             <img
               src="/roopam-logo.png"
               alt="Roopam Bag Mall Logo"
@@ -69,17 +74,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
           </div>
           {!isCollapsed && (
             <div className="overflow-hidden whitespace-nowrap">
-              <span className="font-display text-base font-semibold text-white block leading-tight">
+              <span className="font-display text-base font-semibold text-white block leading-tight group-hover:text-accent-200 transition-colors">
                 Roopam Bag Mall
               </span>
               <span className="text-[10px] text-accent-300 block font-medium tracking-wide">Since 1967 • Retail POS</span>
             </div>
           )}
         </div>
-      </div>
+      </Link>
 
       {/* Navigation List */}
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
+        {/* Storefront Home */}
+        <NavLink to="/home" className={navItemClass} title="Storefront Home">
+          <Store className="w-4 h-4 shrink-0" />
+          {!isCollapsed && <span>Storefront Home</span>}
+        </NavLink>
+
         {!isCustomer && (
           <>
         {/* Dashboard */}
