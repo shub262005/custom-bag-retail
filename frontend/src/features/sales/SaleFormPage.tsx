@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Printer } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -22,6 +23,7 @@ import { useSale, useCreateSale, useUpdateSale, validSaleId } from './useSales'
 import { CustomerSearchSelect } from '../customers/CustomerSearchSelect'
 import { localToday, paymentOptions, paymentLabel, roundMoney } from './saleForm'
 import { ProductScanner } from '../../components/products/ProductScanner'
+import { InvoiceModal } from '../invoices'
 
 interface Row { productId: number; name: string; sku: string; quantity: string; price: string }
 export function SaleFormPage({ mode = 'create' }: { mode?: 'create' | 'edit' }) {
@@ -59,6 +61,7 @@ function SaleForm({ original }: { original?: SaleResponse }) {
   const [fields, setFields] = useState<Record<string, string> | undefined>()
   const [review, setReview] = useState(false)
   const [saved, setSaved] = useState<SaleResponse | null>(null)
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false)
 
   // Customer & Due Payment State
   const [isDueSale, setIsDueSale] = useState(Boolean(original?.dueAmount && original.dueAmount > 0))
@@ -154,7 +157,28 @@ function SaleForm({ original }: { original?: SaleResponse }) {
   return <div className="space-y-4">
     <PageHeader title={original ? `Edit ${original.saleNumber}` : 'POS Checkout'} description={original ? 'Update this sale and its inventory quantities.' : 'Create a sale using current product inventory.'} breadcrumbs={[{ label: 'Sales', href: '/sales' }, { label: original ? 'Edit Sale' : 'POS' }]} actions={<Link to={original ? `/sales/${original.id}` : '/sales'}><Button variant="secondary">{original ? 'Back to Sale' : 'Sales History'}</Button></Link>} />
     {original && <p className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">Editing this completed sale may change inventory quantities. Available quantity includes the units already sold on this sale.</p>}
-    {saved && <div role="status" className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900">Sale <strong>{saved.saleNumber}</strong> completed • {formatINR(saved.grandTotal)}. <Link className="underline font-semibold" to={`/sales/${saved.id}`}>Open Sale Details</Link></div>}
+    {saved && (
+      <div role="status" className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
+        <div>
+          Sale <strong>{saved.saleNumber}</strong> completed • {formatINR(saved.grandTotal)}.
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            leftIcon={<Printer className="w-3.5 h-3.5" />}
+            onClick={() => setInvoiceModalOpen(true)}
+            className="border-emerald-300 text-emerald-900 hover:bg-emerald-100"
+          >
+            Print / Export Invoice
+          </Button>
+          <Link className="underline font-semibold text-xs ml-2" to={`/sales/${saved.id}`}>
+            Open Sale Details →
+          </Link>
+        </div>
+      </div>
+    )}
     {error && <ErrorAlert message={error} validationErrors={fields} />}
     {catalogue.isError && <ErrorAlert message={getErrorMessage(catalogue.error)} onRetry={() => catalogue.refetch()} />}
     <form noValidate onSubmit={e => { e.preventDefault(); if (validate()) setReview(true) }}>
@@ -336,5 +360,10 @@ function SaleForm({ original }: { original?: SaleResponse }) {
         {original && <p>Automatically reduce payment on total decrease: {reduce ? 'Yes' : 'No'}</p>}
       </div>
     </Modal>
+    <InvoiceModal
+      isOpen={invoiceModalOpen}
+      onClose={() => setInvoiceModalOpen(false)}
+      sale={saved}
+    />
   </div>
 }

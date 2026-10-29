@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronDown, PackageOpen, ExternalLink } from 'lucide-react'
+import { ChevronDown, PackageOpen, ExternalLink, Printer } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
@@ -14,15 +14,17 @@ import { SkeletonTable } from '../../components/ui/Skeleton'
 import { useDebounce } from '../../hooks/useDebounce'
 import { getErrorMessage } from '../../api/errorParser'
 import { formatDate, formatINR } from '../../utils/formatters'
-import type { SaleFilterParams } from '../../types/sale.types'
+import type { SaleFilterParams, SaleResponse } from '../../types/sale.types'
 import { useSales } from './useSales'
 import { paymentLabel, paymentOptions } from './saleForm'
+import { InvoiceModal } from '../invoices'
 
 export function SalesListPage() {
   const [filters, setFilters] = useState<SaleFilterParams>({})
   const [page, setPage] = useState(1)
   const [size, setSize] = useState(10)
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set())
+  const [selectedInvoiceSale, setSelectedInvoiceSale] = useState<SaleResponse | null>(null)
   const toggleExpand = (id: number) => {
     setExpandedIds(prev => {
       const next = new Set(prev)
@@ -81,7 +83,20 @@ export function SalesListPage() {
               <TableCell className="font-semibold text-slate-900">{formatINR(sale.grandTotal)}</TableCell>
               <TableCell>{paymentLabel(sale.payment?.paymentMethod)}</TableCell>
               <TableCell><Badge variant={sale.status === 'CANCELLED' ? 'danger' : 'success'}>{sale.status === 'CANCELLED' ? 'Cancelled' : 'Completed'}</Badge></TableCell>
-              <TableCell><Link className="text-blue-700 hover:underline font-medium" to={`/sales/${sale.id}`}>View</Link></TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Link className="text-blue-700 hover:underline font-medium text-xs" to={`/sales/${sale.id}`}>View</Link>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedInvoiceSale(sale)}
+                    className="p-1 rounded text-slate-500 hover:text-brand-900 hover:bg-slate-100 transition-colors"
+                    title="Print or Export Tax Invoice"
+                    aria-label="Invoice"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </TableCell>
             </TableRow>
 
             {isExpanded && (
@@ -159,7 +174,7 @@ export function SalesListPage() {
                       </table>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">
                       <div className="text-slate-500">
                         Payment: <strong>{paymentLabel(sale.payment?.paymentMethod)}</strong>
                         {sale.dueAmount != null && sale.dueAmount > 0 && (
@@ -168,12 +183,22 @@ export function SalesListPage() {
                           </span>
                         )}
                       </div>
-                      <Link
-                        to={`/sales/${sale.id}`}
-                        className="inline-flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-800 hover:underline"
-                      >
-                        View Complete Bill Details <ExternalLink className="w-3 h-3" />
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          leftIcon={<Printer className="w-3.5 h-3.5" />}
+                          onClick={() => setSelectedInvoiceSale(sale)}
+                        >
+                          Print / Export Invoice
+                        </Button>
+                        <Link
+                          to={`/sales/${sale.id}`}
+                          className="inline-flex items-center gap-1 font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          Full Details <ExternalLink className="w-3 h-3" />
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </TableCell>
@@ -184,5 +209,10 @@ export function SalesListPage() {
       })}</TableBody></Table>
       <Pagination currentPage={currentPage} totalPages={pages} totalItems={sales.length} pageSize={size} onPageChange={setPage} onPageSizeChange={n => { setSize(n); setPage(1) }} />
     </section>}
+    <InvoiceModal
+      isOpen={Boolean(selectedInvoiceSale)}
+      onClose={() => setSelectedInvoiceSale(null)}
+      sale={selectedInvoiceSale}
+    />
   </div>
 }

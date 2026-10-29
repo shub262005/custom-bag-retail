@@ -20,7 +20,8 @@ import { useSuppliers } from '../suppliers/useSuppliers'
 import { useDebounce } from '../../hooks/useDebounce'
 import { formatINR, formatDate } from '../../utils/formatters'
 import { getErrorMessage } from '../../api/errorParser'
-import type { PaymentStatus, PurchaseFilterParams, PurchaseStatus } from '../../types'
+import type { PaymentStatus, PurchaseFilterParams, PurchaseStatus, PurchaseResponse } from '../../types'
+import { InvoiceModal } from '../invoices'
 import {
   Plus,
   Search,
@@ -29,6 +30,7 @@ import {
   Edit2,
   Filter,
   Inbox,
+  Printer,
 } from 'lucide-react'
 
 export const PurchaseListPage: React.FC = () => {
@@ -44,6 +46,7 @@ export const PurchaseListPage: React.FC = () => {
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
+  const [invoicePurchase, setInvoicePurchase] = useState<PurchaseResponse | null>(null)
 
   // Memoized query filter parameters for the backend
   const queryFilters: PurchaseFilterParams = useMemo(
@@ -377,6 +380,18 @@ export const PurchaseListPage: React.FC = () => {
                         </Button>
                       </Link>
 
+                      {/* Invoice / Print Action */}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="p-1.5 text-slate-600 hover:text-slate-900"
+                        onClick={() => setInvoicePurchase(purchase)}
+                        title="Print or Export PO Invoice"
+                        aria-label="PO Invoice"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                      </Button>
+
                       {/* Edit Action (Only for COMPLETED purchases) */}
                       {purchase.status === 'COMPLETED' && (
                         <Link to={`/purchases/${purchase.id}/edit`} title="Edit Purchase">
@@ -406,6 +421,13 @@ export const PurchaseListPage: React.FC = () => {
           />
         </div>
       )}
+
+      {/* Invoice Modal */}
+      <InvoiceModal
+        isOpen={Boolean(invoicePurchase)}
+        onClose={() => setInvoicePurchase(null)}
+        purchase={invoicePurchase}
+      />
     </div>
   )
 }

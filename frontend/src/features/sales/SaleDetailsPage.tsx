@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { Printer } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Button } from '../../components/ui/Button'
 import { Badge } from '../../components/ui/Badge'
@@ -13,6 +14,7 @@ import { useSale, useSaleInventory, useSaleAudit, validSaleId } from './useSales
 import { paymentLabel, cancellationOptions } from './saleForm'
 import { SaleCancellationModal } from './SaleCancellationModal'
 import { RecordRepaymentModal } from '../customers/RecordRepaymentModal'
+import { InvoiceModal } from '../invoices'
 import { useAuth } from '../../hooks/useAuth'
 
 export function SaleDetailsPage() {
@@ -24,6 +26,7 @@ export function SaleDetailsPage() {
   const audit = useSaleAudit(saleId)
   const [cancelOpen, setCancelOpen] = useState(false)
   const [repayOpen, setRepayOpen] = useState(false)
+  const [invoiceOpen, setInvoiceOpen] = useState(false)
   if (!validSaleId(saleId)) return <ErrorAlert message="Invalid sale ID." />
   if (query.isPending) return <SkeletonTable rows={5} cols={5} />
   if (query.isError) return <div className="space-y-4"><ErrorAlert message={getErrorMessage(query.error)} onRetry={() => query.refetch()} /><Link to="/sales" className="text-blue-700">Back to Sales</Link></div>
@@ -31,7 +34,29 @@ export function SaleDetailsPage() {
   const cancelled = sale.status === 'CANCELLED'
   const canCancel = user?.role === 'ADMIN' || user?.role === 'INVENTORY_MANAGER'
   return <div className="space-y-5">
-    <PageHeader title={sale.saleNumber} description={`Sale date: ${formatDate(sale.saleDate)}`} breadcrumbs={[{ label: 'Sales', href: '/sales' }, { label: sale.saleNumber }]} actions={<div className="flex gap-2"><Link to="/sales"><Button variant="secondary">Back to Sales</Button></Link>{!cancelled && <><Link to={`/sales/${sale.id}/edit`}><Button variant="secondary">Edit Sale</Button></Link>{canCancel && <Button variant="danger" onClick={() => setCancelOpen(true)}>Cancel Sale</Button>}</>}</div>} />
+    <PageHeader
+      title={sale.saleNumber}
+      description={`Sale date: ${formatDate(sale.saleDate)}`}
+      breadcrumbs={[{ label: 'Sales', href: '/sales' }, { label: sale.saleNumber }]}
+      actions={
+        <div className="flex flex-wrap gap-2">
+          <Link to="/sales"><Button variant="secondary">Back to Sales</Button></Link>
+          <Button
+            variant="outline"
+            leftIcon={<Printer className="w-4 h-4 text-slate-700" />}
+            onClick={() => setInvoiceOpen(true)}
+          >
+            Tax Invoice / Print
+          </Button>
+          {!cancelled && (
+            <>
+              <Link to={`/sales/${sale.id}/edit`}><Button variant="secondary">Edit Sale</Button></Link>
+              {canCancel && <Button variant="danger" onClick={() => setCancelOpen(true)}>Cancel Sale</Button>}
+            </>
+          )}
+        </div>
+      }
+    />
     <div className="flex flex-wrap gap-4 items-center text-xs text-slate-500"><Badge variant={cancelled ? 'danger' : 'success'}>{sale.status === 'CANCELLED' ? 'Cancelled' : 'Completed'}</Badge><span>Created: {formatDateTime(sale.createdAt)}</span><span>Updated: {formatDateTime(sale.updatedAt)}</span></div>
     {cancelled && <section className="p-4 border border-red-200 bg-red-50 rounded-lg text-sm space-y-1"><h2 className="font-semibold text-red-900">Cancelled sale — read only</h2><p>{cancellationOptions.find(o => o.value === sale.cancellationReason)?.label ?? sale.cancellationReason}</p><p>{sale.cancellationDescription || 'No description'}</p><p>Cancelled {formatDateTime(sale.cancelledAt)} by {sale.cancelledBy || '—'}</p><p>Stock restored. Payment and sale history retained.</p></section>}
     <section className="bg-white border border-slate-200 rounded-lg overflow-hidden"><h2 className="p-4 font-semibold">Sale items</h2><Table><TableHeader><TableRow>{['Product', 'SKU', 'Barcode', 'Quantity', 'Selling Price', 'Item Total'].map(h => <TableHead key={h}>{h}</TableHead>)}</TableRow></TableHeader><TableBody>{sale.items.map(i => <TableRow key={i.id}><TableCell>{i.productName || 'Unavailable product'}</TableCell><TableCell>{i.sku || '—'}</TableCell><TableCell>{i.barcode || '—'}</TableCell><TableCell>{i.quantity}</TableCell><TableCell>{formatINR(i.sellingPrice)}</TableCell><TableCell>{formatINR(i.itemTotal)}</TableCell></TableRow>)}</TableBody></Table></section>
@@ -152,5 +177,10 @@ export function SaleDetailsPage() {
         }}
       />
     )}
+    <InvoiceModal
+      isOpen={invoiceOpen}
+      onClose={() => setInvoiceOpen(false)}
+      sale={sale}
+    />
   </div>
 }

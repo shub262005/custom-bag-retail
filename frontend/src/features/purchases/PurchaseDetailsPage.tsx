@@ -12,6 +12,7 @@ import {
   Package,
   Trash2,
   Clock,
+  Printer,
 } from 'lucide-react'
 import { PageHeader } from '../../components/layout/PageHeader'
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card'
@@ -29,6 +30,7 @@ import {
   useDeletePurchasePayment,
 } from './usePurchases'
 import { PurchasePaymentModal } from './PurchasePaymentModal'
+import { InvoiceModal } from '../invoices'
 import type { PurchasePaymentResponse } from '../../types'
 
 export const PurchaseDetailsPage: React.FC = () => {
@@ -47,6 +49,7 @@ export const PurchaseDetailsPage: React.FC = () => {
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
   const [paymentToDelete, setPaymentToDelete] = useState<PurchasePaymentResponse | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false)
 
   // Loading state
   if (isLoading) {
@@ -170,6 +173,15 @@ export const PurchaseDetailsPage: React.FC = () => {
               onClick={() => navigate('/purchases')}
             >
               Back
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              leftIcon={<Printer className="w-4 h-4 text-slate-700" />}
+              onClick={() => setIsInvoiceOpen(true)}
+            >
+              PO Invoice / Print
             </Button>
 
             {!isCancelled && (
@@ -598,6 +610,13 @@ export const PurchaseDetailsPage: React.FC = () => {
         isLoading={deletePaymentMutation.isPending}
         onConfirm={handleConfirmDeletePayment}
         onCancel={() => setPaymentToDelete(null)}
+      />
+
+      {/* Invoice / Print Modal */}
+      <InvoiceModal
+        isOpen={isInvoiceOpen}
+        onClose={() => setIsInvoiceOpen(false)}
+        purchase={purchase}
       />
     </div>
   )
