@@ -253,7 +253,7 @@ export const InventoryHistoryPage: React.FC = () => {
                 <TableRow>
                   <TableHead className="w-[170px]">Date &amp; Time</TableHead>
                   <TableHead className="w-[260px]">Product</TableHead>
-                  <TableHead className="text-center w-[130px]">Movement</TableHead>
+                  <TableHead className="text-center w-[150px] whitespace-nowrap">Movement</TableHead>
                   <TableHead className="text-center w-[120px]">Quantity</TableHead>
                   <TableHead className="text-center w-[160px]">Stock Transition</TableHead>
                   <TableHead className="w-[180px]">Reference</TableHead>
@@ -293,23 +293,23 @@ export const InventoryHistoryPage: React.FC = () => {
                       </TableCell>
 
                       {/* Movement Type Badge */}
-                      <TableCell className="text-center">
+                      <TableCell className="text-center whitespace-nowrap">
                         {isStockIn && (
-                          <Badge variant="success" size="sm">
-                            <ArrowDownLeft className="w-3 h-3 mr-1" />
-                            STOCK IN
+                          <Badge variant="success" size="sm" className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1">
+                            <ArrowDownLeft className="w-3.5 h-3.5 shrink-0" />
+                            <span className="font-semibold tracking-wide">STOCK IN</span>
                           </Badge>
                         )}
                         {isStockOut && (
-                          <Badge variant="danger" size="sm">
-                            <ArrowUpRight className="w-3 h-3 mr-1" />
-                            STOCK OUT
+                          <Badge variant="danger" size="sm" className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1">
+                            <ArrowUpRight className="w-3.5 h-3.5 shrink-0" />
+                            <span className="font-semibold tracking-wide">STOCK OUT</span>
                           </Badge>
                         )}
                         {isAdjustment && (
-                          <Badge variant="info" size="sm">
-                            <RefreshCw className="w-3 h-3 mr-1" />
-                            ADJUSTMENT
+                          <Badge variant="info" size="sm" className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1">
+                            <RefreshCw className="w-3.5 h-3.5 shrink-0" />
+                            <span className="font-semibold tracking-wide">ADJUSTMENT</span>
                           </Badge>
                         )}
                       </TableCell>

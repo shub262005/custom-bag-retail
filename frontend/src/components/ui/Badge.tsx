@@ -31,17 +31,17 @@ export const Badge: React.FC<BadgeProps> = ({
   }
 
   const sizeStyles = {
-    sm: 'text-[11px] px-1.5 py-0.5',
+    sm: 'text-[11px] px-2 py-0.5',
     md: 'text-xs px-2.5 py-0.5',
   }
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-medium border rounded-full ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-1.5 whitespace-nowrap font-medium border rounded-full ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
       {...props}
     >
       {dot && <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${dotStyles[variant]}`} />}
-      <span>{children}</span>
+      <span className="inline-flex items-center gap-1 shrink-0">{children}</span>
     </span>
   )
 }
