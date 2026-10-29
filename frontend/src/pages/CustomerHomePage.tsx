@@ -94,7 +94,22 @@ export function CustomerHomePage() {
             <div className="mt-6 grid gap-3 xl:grid-cols-3">
               <div className="flex gap-3 rounded-2xl border border-rose-200 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-brand-700"><MapPin className="h-5 w-5" aria-hidden="true" /></span>
-                <div className="min-w-0"><p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Address</p>{storefrontConfig.address ? <address className="mt-1 not-italic text-sm font-semibold text-slate-900">{storefrontConfig.address}</address> : <p className="mt-1 text-sm font-semibold text-slate-700">Contact the store for location details</p>}</div>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Address</p>
+                  {storefrontConfig.address ? (
+                    <a
+                      href={storefrontConfig.mapsUrl || '#'}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-1 block text-sm font-semibold text-slate-900 hover:text-brand-700 transition-colors underline-offset-2 hover:underline"
+                      title="Open shop location in Google Maps"
+                    >
+                      {storefrontConfig.address}
+                    </a>
+                  ) : (
+                    <p className="mt-1 text-sm font-semibold text-slate-700">Contact the store for location details</p>
+                  )}
+                </div>
               </div>
               <div className="flex gap-3 rounded-2xl border border-rose-200 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-brand-700"><Phone className="h-5 w-5" aria-hidden="true" /></span>

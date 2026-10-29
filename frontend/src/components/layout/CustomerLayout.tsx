@@ -111,7 +111,23 @@ export function CustomerLayout() {
           <div>
             <p className="text-lg font-bold text-white">{storefrontConfig.storeName}</p>
             <p className="mt-2 max-w-md text-sm leading-6 text-rose-200/70">{storefrontConfig.tagline}</p>
-            {storefrontConfig.address && <p className="mt-3 text-sm">{storefrontConfig.address}</p>}
+            {storefrontConfig.address && (
+              <p className="mt-3 text-sm text-rose-200/80">
+                {storefrontConfig.mapsUrl ? (
+                  <a
+                    href={storefrontConfig.mapsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="hover:text-white underline-offset-2 hover:underline transition-colors"
+                    title="Open shop location in Google Maps"
+                  >
+                    📍 {storefrontConfig.address}
+                  </a>
+                ) : (
+                  <span>📍 {storefrontConfig.address}</span>
+                )}
+              </p>
+            )}
           </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-rose-300/70">Customer links</p>
