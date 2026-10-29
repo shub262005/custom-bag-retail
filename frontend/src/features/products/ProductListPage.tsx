@@ -24,6 +24,9 @@ import { getErrorMessage } from '../../api/errorParser'
 import { Plus, Edit2, CheckCircle2, XCircle, Search, X, Package } from 'lucide-react'
 import type { ProductResponse, ProductStatus } from '../../types'
 
+// Image column visibility toggle (retained in code for easy re-enabling)
+const SHOW_IMAGE_COLUMN = false
+
 export const ProductListPage: React.FC = () => {
   const toast = useToast()
 
@@ -259,7 +262,7 @@ export const ProductListPage: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-12 text-center">Image</TableHead>
+                {SHOW_IMAGE_COLUMN && <TableHead className="w-12 text-center">Image</TableHead>}
                 <TableHead>Product</TableHead>
                 <TableHead className="w-36">SKU / Barcode</TableHead>
                 <TableHead className="w-32">Category</TableHead>
@@ -279,25 +282,27 @@ export const ProductListPage: React.FC = () => {
 
                 return (
                   <TableRow key={product.id}>
-                    {/* Thumbnail */}
-                    <TableCell className="text-center p-2">
-                      <div className="w-9 h-9 rounded border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden mx-auto">
-                        {product.imageUrl ? (
-                          <img
-                            src={product.imageUrl}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              // Replace broken image with fallback icon
-                              ;(e.currentTarget as HTMLElement).style.display = 'none'
-                              e.currentTarget.parentElement?.classList.add('fallback-icon')
-                            }}
-                          />
-                        ) : (
-                          <Package className="w-4 h-4 text-slate-400" />
-                        )}
-                      </div>
-                    </TableCell>
+                    {/* Thumbnail (kept intact, hidden on this page via SHOW_IMAGE_COLUMN) */}
+                    {SHOW_IMAGE_COLUMN && (
+                      <TableCell className="text-center p-2">
+                        <div className="w-9 h-9 rounded border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden mx-auto">
+                          {product.imageUrl ? (
+                            <img
+                              src={product.imageUrl}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                // Replace broken image with fallback icon
+                                ;(e.currentTarget as HTMLElement).style.display = 'none'
+                                e.currentTarget.parentElement?.classList.add('fallback-icon')
+                              }}
+                            />
+                          ) : (
+                            <Package className="w-4 h-4 text-slate-400" />
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
 
                     {/* Product Name + Attributes */}
                     <TableCell>
