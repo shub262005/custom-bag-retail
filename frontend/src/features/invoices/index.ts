@@ -1,3 +1,9 @@
 export { InvoiceModal } from './InvoiceModal'
-export { generateSaleInvoicePdf, generatePurchaseInvoicePdf } from './invoicePdfGenerator'
-
+export {
+  generateSaleInvoicePdf,
+  generatePurchaseInvoicePdf,
+  printSaleInvoicePdf,
+  printPurchaseInvoicePdf,
+  buildSaleInvoicePdf,
+  buildPurchaseInvoicePdf,
+} from './invoicePdfGenerator'

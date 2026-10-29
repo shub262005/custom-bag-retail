@@ -6,12 +6,12 @@ import { storefrontConfig } from '../../config/storefrontConfig'
 import { formatDate } from '../../utils/formatters'
 
 // Helper to format currency values cleanly without unicode symbols that might glitch in standard font
-function formatPdfMoney(amount: number | null | undefined): string {
+export function formatPdfMoney(amount: number | null | undefined): string {
   const val = Number(amount) || 0
   return `Rs. ${val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 }
 
-export function generateSaleInvoicePdf(sale: SaleResponse) {
+export function buildSaleInvoicePdf(sale: SaleResponse): jsPDF {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -43,7 +43,7 @@ export function generateSaleInvoicePdf(sale: SaleResponse) {
 
   // 2. Invoice Meta Info & Customer Details Cards
   doc.setTextColor(30, 41, 59)
-  let y = 35
+  const y = 35
 
   // Left column: Bill To
   doc.setFont('helvetica', 'bold')
@@ -197,10 +197,10 @@ export function generateSaleInvoicePdf(sale: SaleResponse) {
   doc.setTextColor(148, 163, 184)
   doc.text('Thank you for shopping with Roopam Bag Mall! Visit again.', pageWidth / 2, 285, { align: 'center' })
 
-  doc.save(`Invoice_${sale.saleNumber}.pdf`)
+  return doc
 }
 
-export function generatePurchaseInvoicePdf(purchase: PurchaseResponse) {
+export function buildPurchaseInvoicePdf(purchase: PurchaseResponse): jsPDF {
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -232,7 +232,7 @@ export function generatePurchaseInvoicePdf(purchase: PurchaseResponse) {
 
   // 2. Meta Info & Supplier Details
   doc.setTextColor(30, 41, 59)
-  let y = 35
+  const y = 35
 
   // Left column: Supplier / Vendor
   doc.setFont('helvetica', 'bold')
@@ -388,5 +388,69 @@ export function generatePurchaseInvoicePdf(purchase: PurchaseResponse) {
   doc.setTextColor(71, 85, 105)
   doc.text('Store Manager / Verification', pageWidth - 42, bottomY + 16, { align: 'center' })
 
+  return doc
+}
+
+// Directly prints the exact jsPDF document
+export function printPdfDocument(doc: jsPDF) {
+  doc.autoPrint()
+  const blob = doc.output('blob')
+  const blobUrl = URL.createObjectURL(blob)
+
+  const iframe = document.createElement('iframe')
+  iframe.style.position = 'fixed'
+  iframe.style.right = '0'
+  iframe.style.bottom = '0'
+  iframe.style.width = '0'
+  iframe.style.height = '0'
+  iframe.style.border = '0'
+  iframe.src = blobUrl
+
+  document.body.appendChild(iframe)
+
+  const trigger = () => {
+    try {
+      iframe.contentWindow?.focus()
+      iframe.contentWindow?.print()
+    } catch {
+      window.open(blobUrl, '_blank')
+    }
+  }
+
+  iframe.onload = () => {
+    setTimeout(trigger, 350)
+  }
+
+  // Fallback trigger in case iframe onload does not fire
+  setTimeout(trigger, 1200)
+
+  // Cleanup after print dialog interaction
+  setTimeout(() => {
+    try {
+      document.body.removeChild(iframe)
+      URL.revokeObjectURL(blobUrl)
+    } catch {
+      // ignore
+    }
+  }, 90000)
+}
+
+export function generateSaleInvoicePdf(sale: SaleResponse) {
+  const doc = buildSaleInvoicePdf(sale)
+  doc.save(`Invoice_${sale.saleNumber}.pdf`)
+}
+
+export function printSaleInvoicePdf(sale: SaleResponse) {
+  const doc = buildSaleInvoicePdf(sale)
+  printPdfDocument(doc)
+}
+
+export function generatePurchaseInvoicePdf(purchase: PurchaseResponse) {
+  const doc = buildPurchaseInvoicePdf(purchase)
   doc.save(`PO_${purchase.purchaseNumber}.pdf`)
+}
+
+export function printPurchaseInvoicePdf(purchase: PurchaseResponse) {
+  const doc = buildPurchaseInvoicePdf(purchase)
+  printPdfDocument(doc)
 }
