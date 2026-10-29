@@ -397,7 +397,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
                   <>
                     <p>1. Goods once sold can be exchanged within 7 days in undamaged condition.</p>
                     <p>2. Please present this invoice for warranty and exchange claims.</p>
-                    <p>3. Roopam Bag Mall offers authorized manufacturer warranty on branded bags.</p>
+                    <p>3. {storefrontConfig.storeName} offers authorized manufacturer warranty on branded bags.</p>
                   </>
                 ) : (
                   <>
@@ -454,7 +454,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
             {/* 5. Signature Footer */}
             <div className="px-6 pb-6 pt-4 flex justify-between items-end border-t border-slate-200 text-xs text-slate-400">
               <div className="text-[11px]">
-                Thank you for shopping with Roopam Bag Mall! Visit again.
+                Thank you for shopping with {storefrontConfig.storeName}! Visit again.
               </div>
               <div className="text-center">
                 <div className="w-44 border-b border-slate-400 mb-1" />

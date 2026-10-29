@@ -182,7 +182,7 @@ export function buildSaleInvoicePdf(sale: SaleResponse): jsPDF {
   doc.setFontSize(7.5)
   doc.text('1. Goods once sold can be exchanged within 7 days in undamaged condition.', 14, finalY + 13)
   doc.text('2. Please present this invoice for warranty and exchange claims.', 14, finalY + 18)
-  doc.text('3. Roopam Bag Mall offers authorized manufacturer warranty on branded bags.', 14, finalY + 23)
+  doc.text(`3. ${storefrontConfig.storeName} offers authorized manufacturer warranty on branded bags.`, 14, finalY + 23)
 
   // 5. Signature and Footer
   const bottomY = Math.max(finalY + 50, 260)
@@ -195,7 +195,7 @@ export function buildSaleInvoicePdf(sale: SaleResponse): jsPDF {
 
   doc.setFontSize(7.5)
   doc.setTextColor(148, 163, 184)
-  doc.text('Thank you for shopping with Roopam Bag Mall! Visit again.', pageWidth / 2, 285, { align: 'center' })
+  doc.text(`Thank you for shopping with ${storefrontConfig.storeName}! Visit again.`, pageWidth / 2, 285, { align: 'center' })
 
   return doc
 }

@@ -1,5 +1,5 @@
 export const storefrontConfig = {
-  storeName: 'Roopam Bag Mall',
+  storeName: 'Roopam Store Bag Mall',
   establishedText: 'Since 1967',
   tagline: 'Bags for work, travel and everyday life.',
   address: 'Tarabai Road, Near Mahalaxmi Temple, C Ward, Kolhapur, Maharashtra 416012',

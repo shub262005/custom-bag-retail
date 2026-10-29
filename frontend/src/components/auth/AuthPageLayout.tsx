@@ -24,10 +24,10 @@ export const AuthPageLayout: React.FC<AuthPageLayoutProps> = ({
     <div className="w-full max-w-md">
       <div className="flex items-center justify-center gap-3 mb-6">
         <div className="w-11 h-11 rounded-lg bg-white border border-slate-200 p-1 shadow-sm">
-          <img src="/roopam-logo.png" alt="Roopam Bag Mall" className="w-full h-full object-contain" />
+          <img src="/roopam-logo.png" alt="Roopam Store Bag Mall" className="w-full h-full object-contain" />
         </div>
         <div>
-          <p className="text-base font-bold text-slate-900 leading-tight">Roopam Bag Mall</p>
+          <p className="text-base font-bold text-slate-900 leading-tight">Roopam Store Bag Mall</p>
           <p className="text-xs font-medium text-orange-600">Since 1967</p>
         </div>
       </div>

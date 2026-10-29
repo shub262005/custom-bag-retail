@@ -62,20 +62,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse 
       <Link
         to="/home"
         className="h-14 border-b border-sidebar-line flex items-center px-3.5 justify-between shrink-0 hover:bg-sidebar-hover transition-colors cursor-pointer group"
-        title="Go to Roopam Bag Mall Home Storefront"
+        title="Go to Roopam Store Bag Mall Home Storefront"
       >
         <div className="flex items-center gap-2.5 overflow-hidden">
           <div className="w-9 h-9 rounded-lg bg-white border border-slate-200 p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-2xs group-hover:scale-105 transition-transform">
             <img
               src="/roopam-logo.png"
-              alt="Roopam Bag Mall Logo"
+              alt="Roopam Store Bag Mall Logo"
               className="w-full h-full object-contain"
             />
           </div>
           {!isCollapsed && (
             <div className="overflow-hidden whitespace-nowrap">
               <span className="font-display text-base font-semibold text-white block leading-tight group-hover:text-accent-200 transition-colors">
-                Roopam Bag Mall
+                Roopam Store Bag Mall
               </span>
               <span className="text-[10px] text-accent-300 block font-medium tracking-wide">Since 1967 • Retail POS</span>
             </div>

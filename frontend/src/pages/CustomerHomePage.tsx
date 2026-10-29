@@ -89,7 +89,7 @@ export function CustomerHomePage() {
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-brand-700">Visit our store</p>
             <h1 id="owner-intro-title" className="mt-3 text-2xl font-black leading-tight tracking-[-0.035em] sm:text-3xl lg:text-5xl">Welcome to {storefrontConfig.storeName}</h1>
             <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.12em] text-brand-700 sm:text-xs sm:tracking-[0.14em]">{storefrontConfig.establishedText}</p>
-            <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600 sm:mt-5 sm:text-base sm:leading-7 lg:text-lg">Roopam Bag Mall is a physical retail shop where customers can explore trusted bag brands, compare products in person and get support with personalized bag requests. {storefrontConfig.tagline}</p>
+            <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600 sm:mt-5 sm:text-base sm:leading-7 lg:text-lg">{storefrontConfig.storeName} is a physical retail shop where customers can explore trusted bag brands, compare products in person and get support with personalized bag requests. {storefrontConfig.tagline}</p>
 
             <div className="mt-6 grid gap-3 xl:grid-cols-3">
               <div className="flex gap-3 rounded-2xl border border-rose-200 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
