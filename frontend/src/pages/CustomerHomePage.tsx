@@ -93,15 +93,31 @@ export function CustomerHomePage() {
 
             <div className="mt-6 grid gap-3 xl:grid-cols-3">
               <div className="flex gap-3 rounded-2xl border border-rose-200 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-brand-700"><MapPin className="h-5 w-5" aria-hidden="true" /></span>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Address</p>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-brand-700">
+                  <MapPin className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Address</p>
+                    {storefrontConfig.mapsUrl && (
+                      <a
+                        href={storefrontConfig.mapsUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-brand-700 hover:text-brand-900 bg-rose-50 hover:bg-rose-100 px-2 py-0.5 rounded-lg border border-rose-200 transition-all hover:scale-105 shrink-0"
+                        title="Open shop location in Google Maps"
+                      >
+                        <MapPin className="h-3 w-3" />
+                        <span>Open in Maps</span>
+                      </a>
+                    )}
+                  </div>
                   {storefrontConfig.address ? (
                     <a
                       href={storefrontConfig.mapsUrl || '#'}
                       target="_blank"
                       rel="noreferrer"
-                      className="mt-1 block text-sm font-semibold text-slate-900 hover:text-brand-700 transition-colors underline-offset-2 hover:underline"
+                      className="mt-1 block text-sm font-semibold text-slate-900 hover:text-brand-700 transition-colors leading-snug"
                       title="Open shop location in Google Maps"
                     >
                       {storefrontConfig.address}
@@ -123,7 +139,6 @@ export function CustomerHomePage() {
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <DesignLink className="group inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-brand-200 transition-all duration-300 hover:-translate-y-1 hover:bg-brand-700 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-brand-300">Design Your Bag <ArrowRight className="h-4 w-4" /></DesignLink>
-              {storefrontConfig.mapsUrl && <a href={storefrontConfig.mapsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-300 bg-white/80 px-5 py-3 text-sm font-bold text-slate-800 shadow-sm transition hover:-translate-y-1 hover:border-brand-300 hover:text-brand-700"><MapPin className="h-4 w-4" />Open in Maps</a>}
             </div>
           </div>
         </div>
